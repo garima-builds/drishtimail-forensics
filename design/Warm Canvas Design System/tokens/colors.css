@@ -1,0 +1,76 @@
+:root {
+  /* --- base palette --- */
+  --coral-500: #cc785c;
+  --coral-700: #a9583e;
+  --coral-100: #e6dfd8;
+  --teal-400: #5db8a6;
+  --amber-400: #e8a55a;
+  --green-500: #5db872;
+  --yellow-600: #d4a017;
+  --red-500: #c64545;
+
+  --cream-050: #faf9f5;
+  --cream-100: #f5f0e8;
+  --cream-200: #efe9de;
+  --cream-300: #e8e0d2;
+  --cream-line: #e6dfd8;
+  --cream-line-soft: #ebe6df;
+
+  --ink-900: #141413;
+  --ink-800: #252523;
+  --ink-700: #3d3d3a;
+  --ink-500: #6c6a64;
+  --ink-400: #8e8b82;
+
+  --night-900: #181715;
+  --night-850: #1f1e1b;
+  --night-800: #252320;
+  --night-fg: #faf9f5;
+  --night-fg-soft: #a09d96;
+
+  /* --- semantic: brand --- */
+  --primary: var(--coral-500);
+  --primary-active: var(--coral-700);
+  --primary-disabled: var(--coral-100);
+  --on-primary: #ffffff;
+  --accent-teal: var(--teal-400);
+  --accent-amber: var(--amber-400);
+
+  /* --- semantic: surface --- */
+  --canvas: var(--cream-050);
+  --surface-soft: var(--cream-100);
+  --surface-card: var(--cream-200);
+  --surface-cream-strong: var(--cream-300);
+  --surface-dark: var(--night-900);
+  --surface-dark-soft: var(--night-850);
+  --surface-dark-elevated: var(--night-800);
+
+  /* --- semantic: line --- */
+  --hairline: var(--cream-line);
+  --hairline-soft: var(--cream-line-soft);
+  --hairline-dark: #302d29;
+
+  /* --- semantic: text --- */
+  --text-ink: var(--ink-900);
+  --text-body-strong: var(--ink-800);
+  --text-body: var(--ink-700);
+  --text-muted: var(--ink-500);
+  --text-muted-soft: var(--ink-400);
+  --text-on-dark: var(--night-fg);
+  --text-on-dark-soft: var(--night-fg-soft);
+  --text-link: var(--coral-500);
+
+  /* --- semantic: status --- */
+  --success: var(--green-500);
+  --warning: var(--yellow-600);
+  --error: var(--red-500);
+
+  /* --- syntax highlighting inside dark code windows --- */
+  --code-plain: #d8d4cc;
+  --code-comment: #6f6b63;
+  --code-keyword: #cc9a7c;
+  --code-string: #9dc4b8;
+  --code-fn: #d8c58a;
+  --code-num: #c8a2c8;
+  --code-gutter: #58544d;
+}

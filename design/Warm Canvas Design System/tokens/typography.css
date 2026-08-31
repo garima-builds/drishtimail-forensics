@@ -1,0 +1,42 @@
+:root {
+  /* Display — serif, weight 400, negative tracking. Never bold. */
+  --display-xl-size: 64px; --display-xl-lh: 1.05; /* @kind other */ --display-xl-ls: -1.5px;
+  --display-lg-size: 48px; --display-lg-lh: 1.1; /* @kind other */ --display-lg-ls: -1px;
+  --display-md-size: 36px; --display-md-lh: 1.15; /* @kind other */ --display-md-ls: -0.5px;
+  --display-sm-size: 28px; --display-sm-lh: 1.2; /* @kind other */ --display-sm-ls: -0.3px;
+  --display-weight: 400;
+
+  /* Titles + body — sans */
+  --title-lg-size: 22px; --title-lg-lh: 1.3; /* @kind other */
+  --title-md-size: 18px; --title-md-lh: 1.4; /* @kind other */
+  --title-sm-size: 16px; --title-sm-lh: 1.4; /* @kind other */
+  --body-md-size: 16px; --body-md-lh: 1.55; /* @kind other */
+  --body-sm-size: 14px; --body-sm-lh: 1.55; /* @kind other */
+  --caption-size: 13px; --caption-lh: 1.4; /* @kind other */
+  --caption-upper-size: 12px; --caption-upper-ls: 1.5px;
+  --code-size: 14px; --code-lh: 1.6; /* @kind other */
+  --button-size: 14px;
+  --nav-link-size: 14px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+}
+
+/* Ready-made type classes — mirror the token table 1:1. */
+.ds-display-xl, .ds-display-lg, .ds-display-md, .ds-display-sm {
+  font-family: var(--font-display); font-weight: var(--display-weight); color: var(--text-ink); margin: 0; text-wrap: pretty;
+}
+.ds-display-xl { font-size: var(--display-xl-size); line-height: var(--display-xl-lh); letter-spacing: var(--display-xl-ls) }
+.ds-display-lg { font-size: var(--display-lg-size); line-height: var(--display-lg-lh); letter-spacing: var(--display-lg-ls) }
+.ds-display-md { font-size: var(--display-md-size); line-height: var(--display-md-lh); letter-spacing: var(--display-md-ls) }
+.ds-display-sm { font-size: var(--display-sm-size); line-height: var(--display-sm-lh); letter-spacing: var(--display-sm-ls) }
+.ds-title-lg, .ds-title-md, .ds-title-sm { font-family: var(--font-sans); font-weight: var(--weight-medium); color: var(--text-ink); margin: 0 }
+.ds-title-lg { font-size: var(--title-lg-size); line-height: var(--title-lg-lh) }
+.ds-title-md { font-size: var(--title-md-size); line-height: var(--title-md-lh) }
+.ds-title-sm { font-size: var(--title-sm-size); line-height: var(--title-sm-lh) }
+.ds-body-md, .ds-body-sm { font-family: var(--font-sans); font-weight: var(--weight-regular); color: var(--text-body); margin: 0; text-wrap: pretty }
+.ds-body-md { font-size: var(--body-md-size); line-height: var(--body-md-lh) }
+.ds-body-sm { font-size: var(--body-sm-size); line-height: var(--body-sm-lh) }
+.ds-caption { font-family: var(--font-sans); font-size: var(--caption-size); line-height: var(--caption-lh); font-weight: var(--weight-medium); color: var(--text-muted) }
+.ds-caption-upper { font-family: var(--font-sans); font-size: var(--caption-upper-size); line-height: 1.4; font-weight: var(--weight-medium); letter-spacing: var(--caption-upper-ls); text-transform: uppercase }
+.ds-code { font-family: var(--font-mono); font-size: var(--code-size); line-height: var(--code-lh); font-weight: var(--weight-regular) }

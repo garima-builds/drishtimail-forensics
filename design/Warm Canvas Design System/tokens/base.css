@@ -1,0 +1,21 @@
+*, *::before, *::after { box-sizing: border-box }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--text-body);
+  font-family: var(--font-sans);
+  font-size: var(--body-md-size);
+  line-height: var(--body-md-lh);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: var(--display-weight); color: var(--text-ink); margin: 0 }
+h1 { font-size: var(--display-xl-size); line-height: var(--display-xl-lh); letter-spacing: var(--display-xl-ls) }
+h2 { font-size: var(--display-lg-size); line-height: var(--display-lg-lh); letter-spacing: var(--display-lg-ls) }
+h3 { font-size: var(--display-md-size); line-height: var(--display-md-lh); letter-spacing: var(--display-md-ls) }
+h4, h5, h6 { font-family: var(--font-sans); font-weight: var(--weight-medium); color: var(--text-ink); margin: 0 }
+p { margin: 0 }
+code, pre { font-family: var(--font-mono); font-size: var(--code-size) }
+a { color: var(--text-link); text-decoration: none }
+a:hover { color: var(--primary-active); text-decoration: underline }
+a:active { color: var(--primary-active) }
+::selection { background: rgba(204, 120, 92, 0.22) }

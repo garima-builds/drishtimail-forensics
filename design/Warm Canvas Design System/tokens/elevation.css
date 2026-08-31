@@ -1,0 +1,8 @@
+:root {
+  /* Color-block first, shadow rare. Only one shadow exists in the system. */
+  --shadow-none: none;
+  --shadow-subtle: 0 1px 3px rgba(20, 20, 19, 0.08);
+  --focus-ring: 0 0 0 3px rgba(204, 120, 92, 0.15);
+  --border-hairline: 1px solid var(--hairline);
+  --border-hairline-dark: 1px solid var(--hairline-dark);
+}

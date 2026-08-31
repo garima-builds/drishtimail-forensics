@@ -1,0 +1,9 @@
+:root {
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;   /* buttons, inputs, tabs */
+  --radius-lg: 12px;  /* content + product cards */
+  --radius-xl: 16px;  /* hero illustration container */
+  --radius-pill: 9999px;
+  --radius-full: 9999px;
+}
