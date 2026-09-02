@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     minio_bucket: str = "evidence-originals"
     jwt_secret: str = "replace-this-development-secret"
     jwt_algorithm: str = "HS256"
-    access_token_minutes: int = 60
+    access_token_minutes: int = 1440
     api_prefix: str = "/api/v1"
 
 

@@ -111,11 +111,7 @@ export const App: React.FC = () => {
   const bootstrapSession = async () => {
     setLoading(true);
     try {
-      if (!api.getToken()) {
-        await api.login('admin@drishtimail.local', 'ChangeMe!2026').catch(() => {
-          // fallback token if login fails
-        });
-      }
+      await api.ensureSession();
       await refreshData();
     } catch (err) {
       console.error('Session bootstrap error:', err);
