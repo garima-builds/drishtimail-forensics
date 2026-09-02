@@ -6,6 +6,7 @@ import { QueueDashboard } from './views/QueueDashboard';
 import { InvestigationView } from './views/InvestigationView';
 import { CampaignGraphView } from './views/CampaignGraphView';
 import { CaseManagementView } from './views/CaseManagementView';
+import { ReportsView } from './views/ReportsView';
 import { ModelEvaluationView } from './views/ModelEvaluationView';
 import { AdminLedgerView } from './views/AdminLedgerView';
 import { api } from './api';
@@ -27,9 +28,8 @@ export const App: React.FC = () => {
   const bootstrapSession = async () => {
     setLoading(true);
     try {
-      // Auto-authenticate with seed investigator if token missing
       if (!api.getToken()) {
-        await api.login('analyst@drishtimail.local', 'change-me-for-local-use').catch(() => {
+        await api.login('admin@drishtimail.local', 'ChangeMe!2026').catch(() => {
           // fallback token if login fails
         });
       }
@@ -67,13 +67,14 @@ export const App: React.FC = () => {
 
   const getTabTitle = () => {
     switch (activeTab) {
-      case 'queue': return 'Forensic Triage Queue';
-      case 'investigate': return 'Message Deep Dive Investigation';
-      case 'campaigns': return 'Campaign Correlation & Graph Intelligence';
+      case 'queue': return 'Investigation Queue';
+      case 'investigate': return 'Investigation Deep Dive';
       case 'cases': return 'Forensic Case Management';
+      case 'campaigns': return 'Campaign Correlation & Graph Intelligence';
+      case 'reports': return 'Forensic Reports & BSA §63 Metadata';
       case 'evaluation': return 'ML Model Registry & Evaluation';
       case 'ledger': return 'Evidence Ledger & Cryptographic Verification';
-      case 'admin': return 'Platform Security Policies & Configuration';
+      case 'admin': return 'Platform Security Administration';
     }
   };
 
@@ -112,10 +113,17 @@ export const App: React.FC = () => {
             />
           )}
 
-          {activeTab === 'campaigns' && <CampaignGraphView />}
-
           {activeTab === 'cases' && (
             <CaseManagementView onSelectMessage={handleSelectMessage} />
+          )}
+
+          {activeTab === 'campaigns' && <CampaignGraphView />}
+
+          {activeTab === 'reports' && (
+            <ReportsView
+              messages={messages}
+              onSelectMessage={handleSelectMessage}
+            />
           )}
 
           {activeTab === 'evaluation' && <ModelEvaluationView />}

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type ActiveTab = 'queue' | 'investigate' | 'campaigns' | 'cases' | 'evaluation' | 'ledger' | 'admin';
+export type ActiveTab = 'queue' | 'investigate' | 'cases' | 'campaigns' | 'reports' | 'evaluation' | 'ledger' | 'admin';
 
 interface SidebarProps {
   activeTab: ActiveTab;
@@ -21,14 +21,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
         </div>
       </div>
 
-      <div className="sidebar-section-title">FORENSIC TRIAGE</div>
+      <div className="sidebar-section-title">CORE INVESTIGATION</div>
       <nav className="sidebar-nav">
         <button
           className={`nav-btn ${activeTab === 'queue' ? 'active' : ''}`}
           onClick={() => onSelectTab('queue')}
         >
           <span className="nav-icon">📥</span>
-          <span>Triage Queue</span>
+          <span>Investigation Queue</span>
         </button>
 
         <button
@@ -36,12 +36,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
           onClick={() => onSelectTab('investigate')}
         >
           <span className="nav-icon">🔬</span>
-          <span>Investigation</span>
+          <span>Investigation Deep Dive</span>
           {selectedMessageId && <span className="nav-badge">Active</span>}
+        </button>
+
+        <button
+          className={`nav-btn ${activeTab === 'cases' ? 'active' : ''}`}
+          onClick={() => onSelectTab('cases')}
+        >
+          <span className="nav-icon">📁</span>
+          <span>Cases</span>
         </button>
       </nav>
 
-      <div className="sidebar-section-title">INTELLIGENCE & CORRELATION</div>
+      <div className="sidebar-section-title">INTELLIGENCE & REPORTING</div>
       <nav className="sidebar-nav">
         <button
           className={`nav-btn ${activeTab === 'campaigns' ? 'active' : ''}`}
@@ -52,22 +60,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
         </button>
 
         <button
-          className={`nav-btn ${activeTab === 'cases' ? 'active' : ''}`}
-          onClick={() => onSelectTab('cases')}
+          className={`nav-btn ${activeTab === 'reports' ? 'active' : ''}`}
+          onClick={() => onSelectTab('reports')}
         >
-          <span className="nav-icon">📁</span>
-          <span>Case Dossiers</span>
+          <span className="nav-icon">📄</span>
+          <span>Reports & BSA §63</span>
         </button>
       </nav>
 
-      <div className="sidebar-section-title">MODEL & LEDGER ASSURANCE</div>
+      <div className="sidebar-section-title">ASSURANCE & CONFIG</div>
       <nav className="sidebar-nav">
         <button
           className={`nav-btn ${activeTab === 'evaluation' ? 'active' : ''}`}
           onClick={() => onSelectTab('evaluation')}
         >
           <span className="nav-icon">📊</span>
-          <span>ML Validation (F2)</span>
+          <span>ML Evaluation (F2)</span>
         </button>
 
         <button
@@ -75,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
           onClick={() => onSelectTab('ledger')}
         >
           <span className="nav-icon">⛓️</span>
-          <span>Evidence Ledger</span>
+          <span>Evidence Ledger (F7)</span>
         </button>
 
         <button
@@ -83,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
           onClick={() => onSelectTab('admin')}
         >
           <span className="nav-icon">⚙️</span>
-          <span>Admin & Policies</span>
+          <span>Administration</span>
         </button>
       </nav>
 

@@ -39,7 +39,9 @@ from .security import create_access_token, password_hash, require_roles
 def seed_admin(db: Session) -> None:
     if not db.scalar(select(User).where(User.email == "admin@drishtimail.local")):
         db.add(User(email="admin@drishtimail.local", password_hash=password_hash.hash("ChangeMe!2026"), role="admin"))
-        db.commit()
+    if not db.scalar(select(User).where(User.email == "analyst@drishtimail.local")):
+        db.add(User(email="analyst@drishtimail.local", password_hash=password_hash.hash("ChangeMe!2026"), role="analyst"))
+    db.commit()
 
 
 def seed_config(db: Session) -> None:

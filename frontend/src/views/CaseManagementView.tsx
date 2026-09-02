@@ -23,11 +23,17 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({ onSelect
     setLoading(true);
     try {
       const data = await api.getCases();
-      setCases(data);
-      if (data.length > 0 && !selectedCase) {
-        setSelectedCase(data[0]);
+      // Ensure notes and message_ids are arrays
+      const sanitized = (data || []).map((c) => ({
+        ...c,
+        notes: Array.isArray(c.notes) ? c.notes : [],
+        message_ids: Array.isArray(c.message_ids) ? c.message_ids : [],
+      }));
+      setCases(sanitized);
+      if (sanitized.length > 0 && !selectedCase) {
+        setSelectedCase(sanitized[0]);
       } else if (selectedCase) {
-        const refreshed = data.find((c) => c.id === selectedCase.id);
+        const refreshed = sanitized.find((c) => c.id === selectedCase.id);
         if (refreshed) setSelectedCase(refreshed);
       }
     } catch (err) {
@@ -45,7 +51,11 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({ onSelect
       setNewCaseTitle('');
       setShowCreateModal(false);
       await loadCases();
-      setSelectedCase(created);
+      setSelectedCase({
+        ...created,
+        notes: Array.isArray(created.notes) ? created.notes : [],
+        message_ids: Array.isArray(created.message_ids) ? created.message_ids : [],
+      });
     } catch (err: any) {
       alert(`Failed to create case: ${err.message}`);
     }
@@ -57,8 +67,13 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({ onSelect
     setUpdating(true);
     try {
       const updated = await api.updateCase(selectedCase.id, undefined, newNote.trim());
+      const cleanUpdated = {
+        ...updated,
+        notes: Array.isArray(updated.notes) ? updated.notes : [],
+        message_ids: Array.isArray(updated.message_ids) ? updated.message_ids : [],
+      };
       setNewNote('');
-      setSelectedCase(updated);
+      setSelectedCase(cleanUpdated);
       await loadCases();
     } catch (err: any) {
       alert(`Failed to add note: ${err.message}`);
@@ -72,7 +87,12 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({ onSelect
     setUpdating(true);
     try {
       const updated = await api.updateCase(selectedCase.id, newStatus, undefined);
-      setSelectedCase(updated);
+      const cleanUpdated = {
+        ...updated,
+        notes: Array.isArray(updated.notes) ? updated.notes : [],
+        message_ids: Array.isArray(updated.message_ids) ? updated.message_ids : [],
+      };
+      setSelectedCase(cleanUpdated);
       await loadCases();
     } catch (err: any) {
       alert(`Failed to update status: ${err.message}`);
@@ -81,12 +101,15 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({ onSelect
     }
   };
 
+  const linkedMessages = selectedCase && Array.isArray(selectedCase.message_ids) ? selectedCase.message_ids : [];
+  const notesList = selectedCase && Array.isArray(selectedCase.notes) ? selectedCase.notes : [];
+
   return (
     <div className="view-container">
       <div className="cases-header-card">
         <div className="card-header">
           <div>
-            <h3>Forensic Case Dossiers & Investigation Workspace (M6)</h3>
+            <h3>Forensic Case Dossiers & Incident Management (M6)</h3>
             <p className="card-desc">
               Organize related phishing incidents into trackable case files with audit logging, analyst notes, and chain-of-custody tracking.
             </p>
@@ -129,7 +152,7 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({ onSelect
                     <span className="status-pill">{c.status}</span>
                   </div>
                   <div className="case-item-meta">
-                    <span>{c.message_ids.length} Associated Evidence Item(s)</span>
+                    <span>{(c.message_ids || []).length} Associated Evidence Item(s)</span>
                     <span>Created: {new Date(c.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
@@ -166,12 +189,12 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({ onSelect
 
               {/* Linked Evidence Messages */}
               <div className="case-section">
-                <h4>Associated Preserved Evidence ({selectedCase.message_ids.length})</h4>
-                {selectedCase.message_ids.length === 0 ? (
+                <h4>Associated Preserved Evidence ({linkedMessages.length})</h4>
+                {linkedMessages.length === 0 ? (
                   <p className="text-muted text-sm">No email evidence messages linked to this case yet.</p>
                 ) : (
                   <div className="linked-messages-list">
-                    {selectedCase.message_ids.map((msgId) => (
+                    {linkedMessages.map((msgId) => (
                       <div key={msgId} className="linked-msg-row">
                         <code className="font-mono text-xs">{msgId}</code>
                         <div className="action-buttons">
@@ -200,13 +223,13 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({ onSelect
               <div className="case-section mt-4">
                 <h4>Analyst Notes & Audit Log</h4>
                 <div className="notes-timeline">
-                  {selectedCase.notes.length === 0 ? (
+                  {notesList.length === 0 ? (
                     <p className="text-muted text-sm">No notes recorded yet.</p>
                   ) : (
-                    selectedCase.notes.map((n, idx) => (
+                    notesList.map((n, idx) => (
                       <div key={idx} className="note-card">
                         <div className="note-timestamp">
-                          {new Date(n.at).toLocaleString()}
+                          {n.at ? new Date(n.at).toLocaleString() : 'Recent'}
                         </div>
                         <div className="note-text">{n.text}</div>
                       </div>
