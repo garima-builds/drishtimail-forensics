@@ -23,10 +23,11 @@ export const AdminLedgerView: React.FC = () => {
   const loadLedgerData = async () => {
     setLoading(true);
     try {
-      const data = await api.getLedgerEntries();
-      setEntries(data);
+      const data = await api.getLedgerEntries().catch(() => []);
+      setEntries(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Failed to load ledger:', err);
+      setEntries([]);
     } finally {
       setLoading(false);
     }

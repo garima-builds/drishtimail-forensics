@@ -165,6 +165,10 @@ export const api = {
     return res.json();
   },
 
+  async triggerEvaluation(): Promise<ModelRegistryItem> {
+    return this.runModelEvaluation();
+  },
+
   // Ledger & Verification (M7 / F7)
   async getLedgerEntries(): Promise<LedgerItem[]> {
     const res = await fetch(`${API_BASE}/ledger/entries`, {

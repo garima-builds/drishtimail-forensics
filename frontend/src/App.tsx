@@ -13,8 +13,18 @@ import { api } from './api';
 import { Message, DashboardSummary } from './types';
 import './styles.css';
 
+const VALID_TABS: ActiveTab[] = ['queue', 'investigate', 'cases', 'campaigns', 'reports', 'evaluation', 'ledger', 'admin'];
+
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('queue');
+  const getTabFromHash = (): ActiveTab => {
+    const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+    if (VALID_TABS.includes(hash as ActiveTab)) {
+      return hash as ActiveTab;
+    }
+    return 'queue';
+  };
+
+  const [activeTab, setActiveTab] = useState<ActiveTab>(getTabFromHash);
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -23,6 +33,13 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     bootstrapSession();
+
+    const handleHashChange = () => {
+      const tab = getTabFromHash();
+      setActiveTab(tab);
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const bootstrapSession = async () => {
@@ -48,21 +65,26 @@ export const App: React.FC = () => {
         api.getMessages().catch(() => []),
       ]);
       if (sum) setSummary(sum);
-      setMessages(msgs);
+      setMessages(Array.isArray(msgs) ? msgs : []);
     } catch (err) {
       console.error('Refresh error:', err);
     }
   };
 
+  const handleNavigate = (tab: ActiveTab) => {
+    setActiveTab(tab);
+    window.location.hash = `#/${tab}`;
+  };
+
   const handleSelectMessage = (id: string) => {
     setSelectedMessageId(id);
-    setActiveTab('investigate');
+    handleNavigate('investigate');
   };
 
   const handleIngestSuccess = async (newMessageId: string) => {
     await refreshData();
     setSelectedMessageId(newMessageId);
-    setActiveTab('investigate');
+    handleNavigate('investigate');
   };
 
   const getTabTitle = () => {
@@ -82,7 +104,7 @@ export const App: React.FC = () => {
     <div className="app-layout">
       <Sidebar
         activeTab={activeTab}
-        onSelectTab={(tab) => setActiveTab(tab)}
+        onSelectTab={handleNavigate}
         selectedMessageId={selectedMessageId}
       />
 
@@ -108,7 +130,7 @@ export const App: React.FC = () => {
           {activeTab === 'investigate' && (
             <InvestigationView
               messageId={selectedMessageId}
-              onBackToQueue={() => setActiveTab('queue')}
+              onBackToQueue={() => handleNavigate('queue')}
               onSelectMessage={handleSelectMessage}
             />
           )}

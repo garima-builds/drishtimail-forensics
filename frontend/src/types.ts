@@ -175,51 +175,72 @@ export interface CaseItem {
   id: string;
   title: string;
   status: string;
-  owner_id?: string;
-  notes: Array<{ at: string; text: string }>;
+  owner_id?: string | null;
+  notes?: Array<{ at: string; text: string }>;
   created_at: string;
-  message_ids: string[];
+  message_ids?: string[];
 }
 
 export interface CampaignItem {
   id: string;
   name: string;
-  first_seen: string;
-  last_seen: string;
-  message_count: number;
-  shared_ip_count: number;
-  shared_domain_count: number;
-  shared_structural_hashes: string[];
-  confidence: string;
+  shared_indicators?: string[];
+  score?: number;
+  status?: string;
+  created_at?: string;
+  first_seen?: string;
+  last_seen?: string;
+  message_count?: number;
+  shared_ip_count?: number;
+  shared_domain_count?: number;
+  shared_structural_hashes?: string[];
+  confidence?: string;
 }
 
 export interface GraphNodeItem {
   id: string;
   node_type: string;
   value: string;
-  sighting_count: number;
-  first_seen: string;
-  last_seen: string;
+  sighting_count?: number;
+  first_seen?: string;
+  last_seen?: string;
 }
 
 export interface GraphEdgeItem {
-  id: string;
-  source_id: string;
-  target_id: string;
-  relation_type: string;
-  created_at: string;
+  id?: string;
+  from_node?: string;
+  to_node?: string;
+  source_id?: string;
+  target_id?: string;
+  edge_type?: string;
+  relation_type?: string;
+  weight?: number;
+  created_at?: string;
 }
 
 export interface ModelRegistryItem {
-  id: string;
-  model_name: string;
+  id?: string;
+  model_name?: string;
   version: string;
-  accuracy: number;
-  macro_f1: number;
-  per_class_metrics: Record<string, { precision: number; recall: number; f1: number; support: number }>;
-  confusion_matrix: Record<string, Record<string, number>>;
-  limitations_disclosure: string[];
-  trained_at: string;
+  accuracy?: number;
+  macro_f1?: number;
+  per_class_metrics?: Record<string, { precision: number; recall: number; f1: number; support: number }>;
+  confusion_matrix?: Record<string, Record<string, number>>;
+  limitations_disclosure?: string[];
+  metrics?: {
+    accuracy: number;
+    macro_f1: number;
+    per_class: Record<string, { precision: number; recall: number; f1: number; support: number }>;
+    confusion_matrix: Record<string, Record<string, number>>;
+  };
+  corpus_manifest?: {
+    corpus_id?: string;
+    name?: string;
+    total_samples?: number;
+    explicit_limitations?: string;
+  };
+  trained_at?: string;
+  calibrated_at?: string;
 }
 
 export interface LedgerItem {
