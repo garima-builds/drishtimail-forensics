@@ -26,8 +26,11 @@ def run_detection_pipeline(
     protected_identities: list[dict[str, Any]] | None = None,
     protected_domains: list[str] | None = None,
 ) -> dict[str, Any]:
-    """Execute complete M2 detection suite and return indicators with class probabilities."""
-    full_text = f"{subject}\n{plain_text}"
+    body_text = plain_text
+    if not body_text and html_body:
+        import re
+        body_text = re.sub(r"<[^>]+>", " ", html_body)
+    full_text = f"{subject}\n{body_text}"
 
     # 1. Social Engineering Cues
     se_findings = detect_social_engineering(full_text)
