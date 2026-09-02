@@ -122,6 +122,30 @@ class TestApiEndpoints(unittest.TestCase):
         self.assertEqual(res_put.status_code, 200)
         self.assertEqual(res_put.json()["value"]["critical"], 70)
 
+    def test_06_bulk_zip_ingest(self):
+        """Verify bulk zip ingestion of multiple .eml messages."""
+        import zipfile
+        import io
+        buf = io.BytesIO()
+        test_id1 = uuid.uuid4().hex[:8]
+        test_id2 = uuid.uuid4().hex[:8]
+        with zipfile.ZipFile(buf, "w") as zf:
+            eml1 = f"From: a@test.com\nTo: b@test.com\nSubject: Bulk 1 {test_id1}\nMessage-ID: <b1-{test_id1}@test.com>\n\nBody 1 {test_id1}".encode()
+            eml2 = f"From: c@test.com\nTo: d@test.com\nSubject: Bulk 2 {test_id2}\nMessage-ID: <b2-{test_id2}@test.com>\n\nBody 2 {test_id2}".encode()
+            zf.writestr("mail1.eml", eml1)
+            zf.writestr("mail2.eml", eml2)
+        buf.seek(0)
+
+        res = self.client.post(
+            "/api/v1/ingest/bulk-zip",
+            headers=self.headers,
+            files={"file": ("batch.zip", buf, "application/zip")},
+        )
+        self.assertEqual(res.status_code, 201)
+        items = res.json()
+        self.assertIsInstance(items, list)
+        self.assertEqual(len(items), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

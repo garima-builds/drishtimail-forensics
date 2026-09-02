@@ -6,6 +6,7 @@ Embedded Content & Quishing (M9 / F3), Evidence Conflicts (M10 / F1),
 Explainable Scoring (M11 / F8), and Evidence Ledger Integrity (M7 / F7).
 """
 import uuid
+from uuid import UUID
 from datetime import datetime, timezone
 from typing import Any
 from sqlalchemy import select
@@ -38,6 +39,20 @@ from .correlation.origin_scenario import classify_origin_scenario
 from .conflicts.rule_engine import evaluate_evidence_conflicts
 from .scoring.normalizer import normalize_all_signals
 from .scoring.weighted_scorer import compute_explainable_score
+
+
+def _sanitize_for_json(obj: Any) -> Any:
+    if isinstance(obj, UUID):
+        return str(obj)
+    elif isinstance(obj, datetime):
+        return obj.isoformat()
+    elif hasattr(obj, "__dataclass_fields__"):
+        return {k: _sanitize_for_json(getattr(obj, k)) for k in obj.__dataclass_fields__}
+    elif isinstance(obj, dict):
+        return {str(k): _sanitize_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple, set)):
+        return [_sanitize_for_json(item) for item in obj]
+    return obj
 
 
 def execute_forensic_pipeline(
@@ -354,20 +369,6 @@ def execute_forensic_pipeline(
             mismatch_flag=u_data.get("mismatch_flag", False),
             evidence_reference_id=analysis_ref.id,
         ))
-
-def _sanitize_for_json(obj: Any) -> Any:
-    if isinstance(obj, UUID):
-        return str(obj)
-    elif isinstance(obj, datetime):
-        return obj.isoformat()
-    elif hasattr(obj, "__dataclass_fields__"):
-        return {k: _sanitize_for_json(getattr(obj, k)) for k in obj.__dataclass_fields__}
-    elif isinstance(obj, dict):
-        return {str(k): _sanitize_for_json(v) for k, v in obj.items()}
-    elif isinstance(obj, (list, tuple, set)):
-        return [_sanitize_for_json(item) for item in obj]
-    return obj
-
 
     # Persist Evidence Conflicts
     for c_data in conflicts:

@@ -366,8 +366,7 @@ FOR EACH ROW EXECUTE FUNCTION prevent_ledger_mutation();
 
 -- Role Grants
 GRANT USAGE ON SCHEMA public TO drishtimail_app;
-GRANT SELECT, INSERT, UPDATE ON messages, cases, platform_config, indicator_history, campaigns, model_registry, retention_policies, alert_rules, alerts TO drishtimail_app;
-GRANT SELECT, INSERT ON users, findings, evidence_objects, evidence_references, evidence_ledger, merkle_roots, mime_parts, parsed_messages, authentication_results, delivery_hops, origin_enrichments, domain_intel, url_artifacts, attachment_artifacts, analysis_runs, evidence_conflicts, score_explanations, graph_nodes, graph_edges, structural_fingerprints, campaign_messages, case_messages, audit_logs TO drishtimail_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO drishtimail_app;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO drishtimail_app;
 REVOKE UPDATE, DELETE, TRUNCATE ON evidence_ledger FROM drishtimail_app;
 

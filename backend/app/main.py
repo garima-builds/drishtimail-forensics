@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from html import escape
 import io
+import os
 from uuid import UUID
 from fastapi import Depends, FastAPI, File, HTTPException, Query, Response, UploadFile, status
 from fastapi.responses import HTMLResponse, StreamingResponse
@@ -269,6 +270,83 @@ def ingest_email_file(file: UploadFile = File(...), _: User = Depends(require_ro
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Ingestion failed: {exc}") from exc
+
+
+@app.post(f"{settings.api_prefix}/ingest/bulk-zip", response_model=list[IngestedMessageOut], status_code=status.HTTP_201_CREATED)
+def ingest_bulk_zip(file: UploadFile = File(...), _: User = Depends(require_roles("admin", "investigator", "analyst")), db: Session = Depends(get_db)):
+    raw_zip = file.file.read()
+    if not raw_zip:
+        raise HTTPException(status_code=422, detail="Uploaded zip archive is empty")
+
+    results: list[IngestedMessageOut] = []
+    try:
+        import zipfile
+        with zipfile.ZipFile(io.BytesIO(raw_zip), "r") as zf:
+            for item in zf.infolist():
+                if item.is_dir() or not (item.filename.lower().endswith(".eml") or item.filename.lower().endswith(".txt")):
+                    continue
+                # Zip-slip prevention
+                if ".." in item.filename or item.filename.startswith("/") or item.filename.startswith("\\"):
+                    continue
+
+                raw_eml = zf.read(item.filename)
+                if not raw_eml:
+                    continue
+
+                parsed = parse_email(raw_eml)
+                prior = db.scalar(select(ParsedMessage).where(ParsedMessage.dedupe_key == parsed.dedupe_key))
+                if prior:
+                    msg = db.get(Message, prior.message_id)
+                    results.append(IngestedMessageOut(**MessageOut.model_validate(msg).model_dump(), duplicate=True))
+                    continue
+
+                base_fname = os.path.basename(item.filename)
+                orig = persist_original(db, filename=base_fname or "message.eml", content_type="message/rfc822", data=raw_eml)
+                ref = add_reference(db, evidence_object_id=orig.id, byte_start=0, byte_end=len(raw_eml), description=f"Bulk archive preserved: {base_fname}")
+
+                message = Message(sender=parsed.sender, subject=parsed.subject, evidence_reference=str(ref.id), summary="Bulk ingested; analysis completed")
+                db.add(message)
+                db.flush()
+
+                db.add(ParsedMessage(
+                    message_id=message.id,
+                    evidence_object_id=orig.id,
+                    rfc_message_id=parsed.rfc_message_id,
+                    dedupe_key=parsed.dedupe_key,
+                    headers=parsed.headers,
+                    plain_text=parsed.plain_text,
+                    html_body=parsed.html_body,
+                    attachment_count=parsed.attachment_count,
+                    evidence_map=parsed.evidence_map,
+                ))
+
+                for part in parsed.mime_parts:
+                    db.add(MimePart(
+                        message_id=message.id,
+                        evidence_object_id=orig.id,
+                        part_index=part.part_index,
+                        content_type=part.content_type,
+                        filename=part.filename,
+                        byte_start=part.byte_start,
+                        byte_end=part.byte_end,
+                        sha256=part.sha256,
+                    ))
+
+                append_ledger(db, event_type="message.ingested", subject_id=message.id, evidence_reference_id=ref.id, payload={"sha256": orig.sha256, "rfc_id": parsed.rfc_message_id, "bulk_source": file.filename})
+                db.commit()
+                db.refresh(message)
+
+                execute_forensic_pipeline(db, message.id)
+                db.refresh(message)
+                results.append(IngestedMessageOut(**MessageOut.model_validate(message).model_dump(), duplicate=False))
+
+    except zipfile.BadZipFile:
+        raise HTTPException(status_code=400, detail="Invalid or corrupt ZIP archive")
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Bulk ingestion failed: {exc}") from exc
+
+    return results
 
 
 @app.post(f"{settings.api_prefix}/ingest/raw-headers", response_model=IngestedMessageOut, status_code=status.HTTP_201_CREATED)
