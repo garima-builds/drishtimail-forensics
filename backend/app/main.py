@@ -566,8 +566,8 @@ def update_case(case_id: str, payload: CaseUpdate, db: Session = Depends(get_db)
 
 
 # ML Model Evaluation Routes (M12 / F2)
-@app.post(f"{settings.api_prefix}/evaluation/run")
-def trigger_evaluation(_: User = Depends(require_roles("admin")), db: Session = Depends(get_db)):
+@app.post(f"{settings.api_prefix}/evaluation/run", response_model=ModelRegistryOut)
+def trigger_evaluation(_: User = Depends(require_roles("admin", "analyst", "investigator")), db: Session = Depends(get_db)):
     return run_model_evaluation(db)
 
 

@@ -161,7 +161,10 @@ export const api = {
       method: 'POST',
       headers: authHeaders(),
     });
-    if (!res.ok) throw new Error('Model validation failed');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Model evaluation request failed');
+    }
     return res.json();
   },
 

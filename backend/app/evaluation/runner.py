@@ -76,9 +76,4 @@ def run_model_evaluation(
     db.commit()
     db.refresh(registry_entry)
 
-    return {
-        "version": registry_entry.version,
-        "calibrated_at": registry_entry.calibrated_at.isoformat(),
-        "metrics": metrics,
-        "corpus_manifest": manifest,
-    }
+    return registry_entry

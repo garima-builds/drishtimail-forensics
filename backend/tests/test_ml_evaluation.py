@@ -73,8 +73,8 @@ class TestMLEvaluation(unittest.TestCase):
         self.assertEqual(len(y_test), 100)
 
         result = run_model_evaluation(self.db, "drishtimail-nlp-v2.1")
-        self.assertIn("metrics", result)
-        metrics = result["metrics"]
+        self.assertIsNotNone(result.metrics)
+        metrics = result.metrics
         self.assertIn("accuracy", metrics)
         self.assertIn("macro_f1", metrics)
         self.assertIn("confusion_matrix", metrics)
