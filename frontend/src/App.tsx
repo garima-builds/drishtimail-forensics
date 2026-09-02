@@ -72,7 +72,9 @@ export const App: React.FC = () => {
     parseTabFromHash(typeof window !== 'undefined' ? window.location.hash : '')
   );
 
-  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(() =>
+    typeof window !== 'undefined' ? localStorage.getItem('drishtimail_selected_msg') : null
+  );
   const [messages, setMessages] = useState<Message[]>([]);
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -129,7 +131,14 @@ export const App: React.FC = () => {
         api.getMessages().catch(() => []),
       ]);
       if (sum) setSummary(sum);
-      setMessages(Array.isArray(msgs) ? msgs : []);
+      const safeMsgs = Array.isArray(msgs) ? msgs : [];
+      setMessages(safeMsgs);
+      setSelectedMessageId((prev) => {
+        if (prev && safeMsgs.some((m) => m.id === prev)) return prev;
+        const stored = typeof window !== 'undefined' ? localStorage.getItem('drishtimail_selected_msg') : null;
+        if (stored && safeMsgs.some((m) => m.id === stored)) return stored;
+        return safeMsgs.length > 0 ? safeMsgs[0].id : null;
+      });
     } catch (err) {
       console.error('Refresh error:', err);
     }
@@ -142,6 +151,9 @@ export const App: React.FC = () => {
 
   const handleSelectMessage = (id: string) => {
     setSelectedMessageId(id);
+    try {
+      localStorage.setItem('drishtimail_selected_msg', id);
+    } catch (_) {}
     navigateToTab('investigate');
   };
 

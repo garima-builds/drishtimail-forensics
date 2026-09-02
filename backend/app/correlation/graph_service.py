@@ -155,8 +155,18 @@ def explore_graph_neighborhood(
             node = db.scalar(select(GraphNode).where(GraphNode.value == node_id_or_value.strip().lower()))
 
     if not node:
-        all_nodes = db.scalars(select(GraphNode).order_by(GraphNode.first_seen.desc()).limit(100)).all()
-        all_edges = db.scalars(select(GraphEdge).limit(200)).all()
+        all_nodes = db.scalars(select(GraphNode).order_by(GraphNode.first_seen.desc()).limit(150)).all()
+        node_ids = {n.id for n in all_nodes}
+        if node_ids:
+            all_edges = db.scalars(
+                select(GraphEdge).where(
+                    GraphEdge.from_node.in_(node_ids),
+                    GraphEdge.to_node.in_(node_ids),
+                )
+            ).all()
+        else:
+            all_edges = []
+
         return {
             "nodes": [
                 {
@@ -207,6 +217,8 @@ def explore_graph_neighborhood(
         current_level = next_level
 
     nodes = db.scalars(select(GraphNode).where(GraphNode.id.in_(visited_node_ids))).all()
+    valid_ids = {n.id for n in nodes}
+    filtered_edges = [e for e in collected_edges if e.from_node in valid_ids and e.to_node in valid_ids]
 
     return {
         "nodes": [
@@ -232,7 +244,7 @@ def explore_graph_neighborhood(
                 "weight": e.weight,
                 "evidence_reference_id": str(e.evidence_reference_id),
             }
-            for e in collected_edges
+            for e in filtered_edges
         ],
     }
 

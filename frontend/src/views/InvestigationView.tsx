@@ -11,18 +11,30 @@ interface InvestigationViewProps {
 export const InvestigationView: React.FC<InvestigationViewProps> = ({
   messageId,
   onBackToQueue,
+  onSelectMessage,
 }) => {
   const [message, setMessage] = useState<Message | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisRunResult | null>(null);
+  const [availableMessages, setAvailableMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'conflicts' | 'auth' | 'urls_qr' | 'hops' | 'intent'>('overview');
   const [reAnalyzing, setReAnalyzing] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!messageId) return;
-    loadInvestigationData(messageId);
-  }, [messageId]);
+    if (messageId) {
+      loadInvestigationData(messageId);
+    } else {
+      setLoading(true);
+      api.getMessages().then((msgs) => {
+        const safeMsgs = Array.isArray(msgs) ? msgs : [];
+        setAvailableMessages(safeMsgs);
+        if (safeMsgs.length > 0 && onSelectMessage) {
+          onSelectMessage(safeMsgs[0].id);
+        }
+      }).catch(() => {}).finally(() => setLoading(false));
+    }
+  }, [messageId, onSelectMessage]);
 
   const loadInvestigationData = async (id: string) => {
     setLoading(true);
@@ -59,13 +71,56 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
   if (!messageId) {
     return (
       <div className="view-container">
-        <div className="empty-investigation-state">
-          <div className="empty-icon">🔬</div>
-          <h2>No Active Investigation Selected</h2>
-          <p>Please select a message from the Triage Queue to begin forensic examination.</p>
-          <button className="btn btn-primary" onClick={onBackToQueue}>
-            Go to Triage Queue
-          </button>
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <h3>Investigation Deep Dive (M1–M11)</h3>
+              <p className="card-desc">Select an ingested email message from the triage archive to inspect forensic evidence.</p>
+            </div>
+            <button className="btn btn-primary" onClick={onBackToQueue}>
+              Go to Triage Queue
+            </button>
+          </div>
+
+          {availableMessages.length > 0 ? (
+            <div className="table-responsive mt-3">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Verdict</th>
+                    <th>Threat Score</th>
+                    <th>Sender</th>
+                    <th>Subject</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {availableMessages.map((m) => (
+                    <tr key={m.id}>
+                      <td><span className={`verdict-tag ${(m.verdict || 'low').toLowerCase()}`}>{m.verdict}</span></td>
+                      <td><strong>{m.score}/100</strong></td>
+                      <td className="font-mono text-xs">{m.sender}</td>
+                      <td>{m.subject}</td>
+                      <td>
+                        <button className="btn btn-sm btn-primary" onClick={() => onSelectMessage && onSelectMessage(m.id)}>
+                          🔍 Inspect
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="empty-investigation-state">
+              <div className="empty-icon">🔬</div>
+              <h2>No Ingested Messages Found</h2>
+              <p>Upload a preserved .eml message to begin deep dive forensic examination.</p>
+              <button className="btn btn-primary" onClick={onBackToQueue}>
+                Go to Triage Queue
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );

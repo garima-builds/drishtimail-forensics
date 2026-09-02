@@ -140,6 +140,25 @@ class TestGraphCampaigns(unittest.TestCase):
         self.assertIn(str(msg1_id), [str(x) for x in matched_cluster.get("connected_message_ids", [])])
         self.assertIn(str(msg2_id), [str(x) for x in matched_cluster.get("connected_message_ids", [])])
 
+    def test_04_no_orphan_or_dangling_edges(self):
+        """Verify that explore_graph_neighborhood never returns edges with nonexistent source or target nodes."""
+        graph = explore_graph_neighborhood(self.db, "")
+        node_ids = {n["id"] for n in graph["nodes"]}
+
+        for edge in graph["edges"]:
+            source_id = edge["source"]
+            target_id = edge["target"]
+            self.assertIn(
+                source_id,
+                node_ids,
+                f"Edge {edge['id']} has dangling source {source_id} not present in graph nodes"
+            )
+            self.assertIn(
+                target_id,
+                node_ids,
+                f"Edge {edge['id']} has dangling target {target_id} not present in graph nodes"
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -59,12 +59,14 @@ export const CampaignGraphView: React.FC = () => {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const validNodeIds = new Set<string>();
     const elements: cytoscape.ElementDefinition[] = [];
 
     // Transform backend nodes
     (graphData.nodes || []).forEach((n) => {
       const typeKey = (n.node_type || '').toUpperCase();
       const styleConfig = NODE_COLORS[typeKey] || NODE_COLORS.DEFAULT;
+      validNodeIds.add(n.id);
       elements.push({
         group: 'nodes',
         data: {
@@ -81,11 +83,11 @@ export const CampaignGraphView: React.FC = () => {
       });
     });
 
-    // Transform backend edges
+    // Transform backend edges - only include if source & target exist in validNodeIds
     (graphData.edges || []).forEach((e, idx) => {
       const sourceId = e.source || e.from_node;
       const targetId = e.target || e.to_node;
-      if (sourceId && targetId) {
+      if (sourceId && targetId && validNodeIds.has(sourceId) && validNodeIds.has(targetId)) {
         elements.push({
           group: 'edges',
           data: {
@@ -106,8 +108,9 @@ export const CampaignGraphView: React.FC = () => {
 
     if (elements.length === 0) return;
 
-    const cy = cytoscape({
-      container: containerRef.current,
+    try {
+      const cy = cytoscape({
+        container: containerRef.current,
       elements,
       style: [
         {
@@ -200,6 +203,9 @@ export const CampaignGraphView: React.FC = () => {
     });
 
     cyRef.current = cy;
+    } catch (err) {
+      console.error('Cytoscape graph initialization error:', err);
+    }
 
     return () => {
       if (cyRef.current) {
