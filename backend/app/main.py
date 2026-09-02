@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from html import escape
 import io
 from uuid import UUID
@@ -272,10 +273,18 @@ def ingest_email_file(file: UploadFile = File(...), _: User = Depends(require_ro
 
 @app.post(f"{settings.api_prefix}/ingest/raw-headers", response_model=IngestedMessageOut, status_code=status.HTTP_201_CREATED)
 def ingest_raw_headers(payload: HeaderIngestRequest, _: User = Depends(require_roles("admin", "investigator", "analyst")), db: Session = Depends(get_db)):
-    parsed = parse_raw_headers(payload.headers_raw)
+    raw_str = payload.get_raw_headers()
+    if not raw_str or len(raw_str.strip()) < 10:
+        raise HTTPException(status_code=400, detail="Valid raw headers string (min 10 characters) is required")
+    parsed = parse_raw_headers(raw_str)
+    prior = db.scalar(select(ParsedMessage).where(ParsedMessage.dedupe_key == parsed.dedupe_key))
+    if prior:
+        message = db.get(Message, prior.message_id)
+        return IngestedMessageOut(**MessageOut.model_validate(message).model_dump(), duplicate=True)
+
     sender = payload.sender or parsed.sender
     subject = payload.subject or parsed.subject
-    raw_bytes = payload.headers_raw.encode("utf-8")
+    raw_bytes = raw_str.encode("utf-8")
 
     orig = persist_original(db, filename="raw_headers.txt", content_type="text/plain", data=raw_bytes)
     ref = add_reference(db, evidence_object_id=orig.id, byte_start=0, byte_end=len(raw_bytes), description="Pasted raw email headers")
@@ -334,9 +343,8 @@ def run_pipeline(message_id: str, _: User = Depends(require_roles("admin", "inve
 @app.get(f"{settings.api_prefix}/messages/{{message_id}}/analysis")
 def get_analysis_result(message_id: str, _: User = Depends(require_roles("admin", "investigator", "analyst")), db: Session = Depends(get_db)):
     val_uuid = UUID(message_id)
-    run = db.scalar(select(AnalysisRun).where(AnalysisRun.message_id == val_uuid))
-    if not run:
-        # Run pipeline if not already executed
+    run = db.scalar(select(AnalysisRun).where(AnalysisRun.message_id == val_uuid).order_by(AnalysisRun.created_at.desc()).limit(1))
+    if not run or not run.result:
         return execute_forensic_pipeline(db, val_uuid)
     return run.result
 

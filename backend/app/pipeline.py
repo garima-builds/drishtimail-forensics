@@ -162,6 +162,62 @@ def execute_forensic_pipeline(
         is_active_case=False,
     )
 
+    # ================= GRANULAR EVIDENCE REFERENCES =================
+    body_offsets = parsed.evidence_map.get("body", [0, 0])
+    auth_offsets = parsed.evidence_map.get("authentication-results", parsed.evidence_map.get("received-spf", [0, 0]))
+    from_offsets = parsed.evidence_map.get("from", [0, 0])
+    reply_to_offsets = parsed.evidence_map.get("reply-to", from_offsets)
+    received_offsets = parsed.evidence_map.get("received", [0, 0])
+
+    analysis_ref = add_reference(
+        db,
+        evidence_object_id=parsed.evidence_object_id,
+        byte_start=body_offsets[0],
+        byte_end=body_offsets[1],
+        description="Full forensic pipeline multi-module analysis source",
+    )
+    auth_ref = add_reference(
+        db,
+        evidence_object_id=parsed.evidence_object_id,
+        byte_start=auth_offsets[0],
+        byte_end=auth_offsets[1],
+        header_name="Authentication-Results",
+        description="Sender authentication validation source",
+    )
+    from_ref = add_reference(
+        db,
+        evidence_object_id=parsed.evidence_object_id,
+        byte_start=from_offsets[0],
+        byte_end=from_offsets[1],
+        header_name="From",
+        description="Sender identity header source",
+    )
+    reply_to_ref = add_reference(
+        db,
+        evidence_object_id=parsed.evidence_object_id,
+        byte_start=reply_to_offsets[0],
+        byte_end=reply_to_offsets[1],
+        header_name="Reply-To",
+        description="Reply destination header source",
+    )
+    received_ref = add_reference(
+        db,
+        evidence_object_id=parsed.evidence_object_id,
+        byte_start=received_offsets[0],
+        byte_end=received_offsets[1],
+        header_name="Received",
+        description="Relay transit headers source",
+    )
+
+    evidence_refs_map = {
+        "primary": analysis_ref.id,
+        "auth": auth_ref.id,
+        "from": from_ref.id,
+        "reply_to": reply_to_ref.id,
+        "received": received_ref.id,
+        "body": analysis_ref.id,
+    }
+
     # Step 10: Evidence Conflict Evaluation (M10 / F1)
     conflicts = evaluate_evidence_conflicts(
         auth_results={
@@ -174,6 +230,8 @@ def execute_forensic_pipeline(
         url_artifacts=url_artifacts_data,
         qr_results=[{"payload": q.payload, "undecodable": q.undecodable} for q in qr_detections],
         origin_info=geo_info,
+        indicator_history=first_contact,
+        evidence_refs=evidence_refs_map,
     )
 
     # Step 11: Explainable Threat Scoring (M11 / F8)
@@ -190,6 +248,7 @@ def execute_forensic_pipeline(
         conflicts=conflicts,
         origin_info=geo_info,
         first_contact_info=first_contact,
+        evidence_refs=evidence_refs_map,
     )
 
     scored_verdict = compute_explainable_score(
@@ -217,19 +276,6 @@ def execute_forensic_pipeline(
         structural_hash=skel_hash,
     )
 
-    # ================= PERSISTENCE & EVIDENCE BINDING =================
-    body_offsets = parsed.evidence_map.get("body", [0, 0])
-    auth_offsets = parsed.evidence_map.get("authentication-results", parsed.evidence_map.get("from", [0, 0]))
-
-    # Primary Analysis Reference
-    analysis_ref = add_reference(
-        db,
-        evidence_object_id=parsed.evidence_object_id,
-        byte_start=body_offsets[0],
-        byte_end=body_offsets[1],
-        description="Full forensic pipeline multi-module analysis source",
-    )
-
     # Update Message fields
     message.score = scored_verdict.score
     message.verdict = scored_verdict.verdict
@@ -252,7 +298,7 @@ def execute_forensic_pipeline(
             establishes=auth_semantics.establishes,
             does_not_establish=auth_semantics.does_not_establish,
             investigation_effect=auth_semantics.investigation_effect,
-            evidence_reference_id=analysis_ref.id,
+            evidence_reference_id=auth_ref.id,
         )
         db.add(auth_record)
 
@@ -309,6 +355,20 @@ def execute_forensic_pipeline(
             evidence_reference_id=analysis_ref.id,
         ))
 
+def _sanitize_for_json(obj: Any) -> Any:
+    if isinstance(obj, UUID):
+        return str(obj)
+    elif isinstance(obj, datetime):
+        return obj.isoformat()
+    elif hasattr(obj, "__dataclass_fields__"):
+        return {k: _sanitize_for_json(getattr(obj, k)) for k in obj.__dataclass_fields__}
+    elif isinstance(obj, dict):
+        return {str(k): _sanitize_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple, set)):
+        return [_sanitize_for_json(item) for item in obj]
+    return obj
+
+
     # Persist Evidence Conflicts
     for c_data in conflicts:
         db.add(EvidenceConflict(
@@ -316,9 +376,9 @@ def execute_forensic_pipeline(
             conflict_type=c_data["conflict_type"],
             summary=c_data["summary"],
             severity=c_data["severity"],
-            evidence_ref_a_id=analysis_ref.id,
-            evidence_ref_b_id=analysis_ref.id,
-            detail=c_data,
+            evidence_ref_a_id=c_data.get("evidence_ref_a_id") or analysis_ref.id,
+            evidence_ref_b_id=c_data.get("evidence_ref_b_id") or analysis_ref.id,
+            detail=_sanitize_for_json(c_data),
         ))
 
     # Persist Score Explanation
@@ -327,7 +387,7 @@ def execute_forensic_pipeline(
         score=scored_verdict.score,
         verdict=scored_verdict.verdict,
         confidence=scored_verdict.confidence,
-        contributions=scored_verdict.contributions,
+        contributions=_sanitize_for_json(scored_verdict.contributions),
         disclaimer=scored_verdict.disclaimer,
         first_contact_suppressed=scored_verdict.first_contact_suppressed,
     ))
@@ -397,11 +457,16 @@ def execute_forensic_pipeline(
     }
 
     # Persist AnalysisRun & Ledger Entry
-    db.add(AnalysisRun(
-        message_id=message_id,
-        evidence_reference_id=analysis_ref.id,
-        result=result_dict,
-    ))
+    existing_run = db.scalar(select(AnalysisRun).where(AnalysisRun.message_id == message_id))
+    if existing_run:
+        existing_run.result = _sanitize_for_json(result_dict)
+        existing_run.evidence_reference_id = analysis_ref.id
+    else:
+        db.add(AnalysisRun(
+            message_id=message_id,
+            evidence_reference_id=analysis_ref.id,
+            result=_sanitize_for_json(result_dict),
+        ))
 
     append_ledger(
         db,
@@ -418,4 +483,4 @@ def execute_forensic_pipeline(
     )
 
     db.commit()
-    return result_dict
+    return _sanitize_for_json(result_dict)

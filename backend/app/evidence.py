@@ -35,9 +35,9 @@ def add_reference(db: Session, *, evidence_object_id: UUID, byte_start: int, byt
     original = db.get(EvidenceObject, evidence_object_id)
     if not original:
         raise ValueError("Evidence object does not exist")
-    if byte_start < 0 or byte_end < byte_start or byte_end > original.byte_size:
-        raise ValueError("Evidence offsets are invalid")
-    reference = EvidenceReference(evidence_object_id=evidence_object_id, header_name=header_name, mime_part_index=mime_part_index, byte_start=byte_start, byte_end=byte_end, description=description)
+    safe_start = max(0, min(byte_start, original.byte_size))
+    safe_end = max(safe_start, min(byte_end, original.byte_size))
+    reference = EvidenceReference(evidence_object_id=evidence_object_id, header_name=header_name, mime_part_index=mime_part_index, byte_start=safe_start, byte_end=safe_end, description=description)
     db.add(reference)
     db.flush()
     return reference

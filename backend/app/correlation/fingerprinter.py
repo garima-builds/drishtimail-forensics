@@ -6,7 +6,12 @@ Enables detection of reused phishing kits across disparate domains and wording v
 """
 import hashlib
 import re
-from bs4 import BeautifulSoup, Comment
+
+try:
+    from bs4 import BeautifulSoup, Comment
+    _HAS_BS4 = True
+except ImportError:
+    _HAS_BS4 = False
 
 
 def extract_structural_skeleton(html_content: str) -> tuple[str, str]:
@@ -16,29 +21,37 @@ def extract_structural_skeleton(html_content: str) -> tuple[str, str]:
         (skeleton_hash, raw_skeleton_string)
     """
     if not html_content or not html_content.strip():
-        # Return fallback empty skeleton
         empty_hash = hashlib.sha256(b"empty_structure").hexdigest()
         return empty_hash, "empty_structure"
 
-    try:
-        soup = BeautifulSoup(html_content, "html.parser")
-        # Remove comments
-        for comment in soup.find_all(text=lambda text: isinstance(text, Comment)):
-            comment.extract()
+    if _HAS_BS4:
+        try:
+            soup = BeautifulSoup(html_content, "html.parser")
+            for comment in soup.find_all(string=lambda text: isinstance(text, Comment)):
+                comment.extract()
 
-        tags_skeleton: list[str] = []
+            tags_skeleton: list[str] = []
+            for tag in soup.find_all(True):
+                attr_keys = sorted(list(tag.attrs.keys())) if tag.attrs else []
+                attr_str = f"[{','.join(attr_keys)}]" if attr_keys else ""
+                tags_skeleton.append(f"<{tag.name}{attr_str}>")
 
-        for tag in soup.find_all(True):
-            attr_keys = sorted(list(tag.attrs.keys())) if tag.attrs else []
-            attr_str = f"[{','.join(attr_keys)}]" if attr_keys else ""
-            tags_skeleton.append(f"<{tag.name}{attr_str}>")
+            raw_skeleton = "".join(tags_skeleton) or "text_only_structure"
+            skeleton_hash = hashlib.sha256(raw_skeleton.encode("utf-8")).hexdigest()
+            return skeleton_hash, raw_skeleton
+        except Exception:
+            pass
 
-        raw_skeleton = "".join(tags_skeleton)
-        if not raw_skeleton:
-            raw_skeleton = "text_only_structure"
+    # Regex-based tag and attribute key extractor fallback
+    clean_html = re.sub(r"<!--.*?-->", "", html_content, flags=re.DOTALL)
+    tag_matches = re.findall(r"<\s*([a-zA-Z0-9]+)([^>]*)>", clean_html)
+    tags_skeleton = []
+    for tag_name, attr_block in tag_matches:
+        attr_keys = sorted(re.findall(r'([a-zA-Z0-9_-]+)\s*=', attr_block))
+        attr_str = f"[{','.join(attr_keys)}]" if attr_keys else ""
+        tags_skeleton.append(f"<{tag_name.lower()}{attr_str}>")
 
-        skeleton_hash = hashlib.sha256(raw_skeleton.encode("utf-8")).hexdigest()
-        return skeleton_hash, raw_skeleton
-    except Exception:
-        fallback_hash = hashlib.sha256(html_content.encode("utf-8", errors="replace")).hexdigest()
-        return fallback_hash, "fallback_raw_structure"
+    raw_skeleton = "".join(tags_skeleton) or "text_only_structure"
+    skeleton_hash = hashlib.sha256(raw_skeleton.encode("utf-8")).hexdigest()
+    return skeleton_hash, raw_skeleton
+

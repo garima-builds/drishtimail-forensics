@@ -86,9 +86,13 @@ class IngestedMessageOut(MessageOut):
 
 
 class HeaderIngestRequest(BaseModel):
-    headers_raw: str = Field(min_length=10)
+    headers_raw: str = Field(default="", min_length=0)
+    raw_headers: str | None = None
     sender: str | None = None
     subject: str | None = None
+
+    def get_raw_headers(self) -> str:
+        return self.headers_raw or self.raw_headers or ""
 
 
 class MimePartOut(BaseModel):
