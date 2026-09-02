@@ -32,7 +32,7 @@ export const ModelEvaluationView: React.FC = () => {
     setEvaluating(true);
     try {
       const result = await api.triggerEvaluation();
-      alert(`Model evaluation completed successfully! Macro F1: ${(Number(result.metrics?.macro_f1 || 0.916) * 100).toFixed(1)}%`);
+      alert(`Model evaluation completed successfully! Macro F1: ${(Number(result.metrics?.macro_f1 ?? 0) * 100).toFixed(1)}%`);
       await loadRegistry();
     } catch (err: any) {
       alert(`Evaluation failed: ${err.message}`);
