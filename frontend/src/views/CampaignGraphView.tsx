@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import cytoscape, { Core, EventObject } from 'cytoscape';
+import cytoscape from 'cytoscape';
+import type { Core, EventObject } from 'cytoscape';
 import { CampaignItem, GraphNodeItem, GraphEdgeItem } from '../types';
 import { api } from '../api';
 
