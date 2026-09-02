@@ -1,0 +1,515 @@
+{
+  "model_version": "drishtimail-nlp-v2.1",
+  "model_type": "TF-IDF (max 2500 n-grams) + Calibrated LinearSVC",
+  "corpus_id": "curated_eval_500",
+  "corpus_name": "Curated 500-Sample Forensic Intent Benchmark",
+  "total_samples": 500,
+  "train_samples": 400,
+  "test_samples_count": 100,
+  "random_seed": 42,
+  "class_distribution": {
+    "phishing": 150,
+    "bec_fraud": 100,
+    "malware_carrier": 80,
+    "impersonation": 70,
+    "spam": 50,
+    "benign": 50
+  },
+  "held_out_test_set": [
+    {
+      "text": "Shared OneDrive Document: Q3 Compensation Review [Ref: 1096]\nA confidential file has been shared with you via OneDrive. Click to authenticate and view: https://onedrive-share-vault.biz/view Incident ID: #5096.",
+      "label": "phishing"
+    },
+    {
+      "text": "President's Office: Emergency Campus Announcement [Notice #427]\nPlease be advised of the campus operations update regarding weather contingencies and safety protocols. Official bulletin ref: IMP-127.",
+      "label": "impersonation"
+    },
+    {
+      "text": "URGENT: Microsoft 365 Account Suspension Notice [Ref: 1060]\nYour Microsoft 365 license has expired. Please verify your credentials immediately at http://login-micros0ft.support-portal.com to restore access. Incident ID: #5060.",
+      "label": "phishing"
+    },
+    {
+      "text": "Re: Outstanding Vendor Invoice #89201 - Priority 22\nPlease confirm if payment for invoice 89201 has cleared. If not, route the settlement via our expedited ACH account today. Reference code: BEC-221.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Urgent Payroll Routing Change - Priority 61\nI recently switched banks. Please update my direct deposit routing number for the upcoming pay cycle before payroll cuts off today. Reference code: BEC-260.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Urgent RFQ Document - Specification Update #369\nPlease find our updated Request for Quotation specifications in the attached RAR archive RFQ_Spec_v2.rar. Provide pricing by Friday. Hash check verification #869.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Payment Receipt & Remittance Advice #302\nAttached is the payment remittance advice. Please open the macro-enabled spreadsheet Receipt_Report.xlsm to verify your transaction line items. Hash check verification #802.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Seminar Announcement: Advances in Distributed Systems (5)\nThe Department of Computer Science invites you to a guest lecture by Dr. A. Raman on scalable consensus protocols. Internal correspondence ref #104.",
+      "label": "benign"
+    },
+    {
+      "text": "Bank Notification: Security Token Re-synchronization [Ref: 1118]\nYour online banking session has been locked due to suspicious activity. Unlock your account at http://secure-banking-auth.xyz Incident ID: #5118.",
+      "label": "phishing"
+    },
+    {
+      "text": "Urgent: Webmail Quota Exceeded (98% Full) [Ref: 1067]\nYour mailbox has exceeded the storage limit. Unread messages will be bounced unless you upgrade your storage quota at http://webmail-storage-quota.info Incident ID: #5067.",
+      "label": "phishing"
+    },
+    {
+      "text": "Special Invitation: International AI & Cyber Summit 2026 - Offer 43\nJoin 5,000+ industry leaders at the upcoming global technology expo. Register now for your complimentary pass. Unsubscribe preferences id: 9042.",
+      "label": "spam"
+    },
+    {
+      "text": "Message from the Office of the Vice Chancellor [Notice #435]\nDear University Community, I am writing to announce an emergency executive directive regarding faculty appointments effective this quarter. Official bulletin ref: IMP-135.",
+      "label": "impersonation"
+    },
+    {
+      "text": "Lunch and Learn: New Architecture Discussion (48)\nHey everyone, we will be hosting a brown-bag lunch session this Friday in Conference Room B to discuss the v2 microservice rollout. Internal correspondence ref #147.",
+      "label": "benign"
+    },
+    {
+      "text": "Best Rates on Commercial Business Loans and Working Capital - Offer 30\nSecure fast working capital financing for your business with zero upfront fees. Apply online in under 5 minutes. Unsubscribe preferences id: 9029.",
+      "label": "spam"
+    },
+    {
+      "text": "URGENT: Microsoft 365 Account Suspension Notice [Ref: 1110]\nYour Microsoft 365 license has expired. Please verify your credentials immediately at http://login-micros0ft.support-portal.com to restore access. Incident ID: #5110.",
+      "label": "phishing"
+    },
+    {
+      "text": "President's Office: Emergency Campus Announcement [Notice #441]\nPlease be advised of the campus operations update regarding weather contingencies and safety protocols. Official bulletin ref: IMP-141.",
+      "label": "impersonation"
+    },
+    {
+      "text": "Bank Transaction Confirmation Slip #315\nAttached is the swift copy of the transfer. Extract the swift report (Swift_Advice.js) to confirm clearance. Hash check verification #815.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Executive Request: Process Payment Authorization - Priority 15\nPlease review the attached vendor agreement and authorize the initial deposit payment of $28,500 immediately to reserve the hardware. Reference code: BEC-214.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Urgent RFQ Document - Specification Update #337\nPlease find our updated Request for Quotation specifications in the attached RAR archive RFQ_Spec_v2.rar. Provide pricing by Friday. Hash check verification #837.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Updated Draft for Project Proposal Review (17)\nHi Prof. Sharma, please find the revised project proposal attached for your feedback ahead of tomorrow's committee review. Internal correspondence ref #116.",
+      "label": "benign"
+    },
+    {
+      "text": "Seminar Announcement: Advances in Distributed Systems (35)\nThe Department of Computer Science invites you to a guest lecture by Dr. A. Raman on scalable consensus protocols. Internal correspondence ref #134.",
+      "label": "benign"
+    },
+    {
+      "text": "Message from the Office of the Vice Chancellor [Notice #428]\nDear University Community, I am writing to announce an emergency executive directive regarding faculty appointments effective this quarter. Official bulletin ref: IMP-128.",
+      "label": "impersonation"
+    },
+    {
+      "text": "IT Helpdesk: Password Expiration Alert [Ref: 1021]\nYour enterprise domain password will expire in 2 hours. Click here to retain your current password and prevent email disconnection: https://auth-portal-update.org/reset Incident ID: #5021.",
+      "label": "phishing"
+    },
+    {
+      "text": "Bank Notification: Security Token Re-synchronization [Ref: 1108]\nYour online banking session has been locked due to suspicious activity. Unlock your account at http://secure-banking-auth.xyz Incident ID: #5108.",
+      "label": "phishing"
+    },
+    {
+      "text": "Urgent Payroll Routing Change - Priority 21\nI recently switched banks. Please update my direct deposit routing number for the upcoming pay cycle before payroll cuts off today. Reference code: BEC-220.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Exclusive 70% Discount on Enterprise Cloud Subscriptions - Offer 16\nLimited time offer! Upgrade your team's cloud storage and compute capacity today with our special promotional pricing. Unsubscribe preferences id: 9015.",
+      "label": "spam"
+    },
+    {
+      "text": "Lunch and Learn: New Architecture Discussion (8)\nHey everyone, we will be hosting a brown-bag lunch session this Friday in Conference Room B to discuss the v2 microservice rollout. Internal correspondence ref #107.",
+      "label": "benign"
+    },
+    {
+      "text": "Urgent Wire Instruction: Supplier Contract - Priority 72\nPlease execute the wire transfer of $62,000 to the overseas supplier before the banking cutoff at 3 PM EST. Keep this transaction confidential. Reference code: BEC-271.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Bank Notification: Security Token Re-synchronization [Ref: 1148]\nYour online banking session has been locked due to suspicious activity. Unlock your account at http://secure-banking-auth.xyz Incident ID: #5148.",
+      "label": "phishing"
+    },
+    {
+      "text": "Bank Notification: Security Token Re-synchronization [Ref: 1128]\nYour online banking session has been locked due to suspicious activity. Unlock your account at http://secure-banking-auth.xyz Incident ID: #5128.",
+      "label": "phishing"
+    },
+    {
+      "text": "Resume / CV Submission for Senior Role #368\nDear Hiring Manager, please find my updated CV and portfolio in the attached archive Resume_2026.iso. Hash check verification #868.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Boost Your Website Ranking on Google with SEO Services - Offer 14\nWe guarantee first-page ranking for your institutional website within 90 days. Click here for a free audit report. Unsubscribe preferences id: 9013.",
+      "label": "spam"
+    },
+    {
+      "text": "Message from the Office of the Vice Chancellor [Notice #421]\nDear University Community, I am writing to announce an emergency executive directive regarding faculty appointments effective this quarter. Official bulletin ref: IMP-121.",
+      "label": "impersonation"
+    },
+    {
+      "text": "Message from the Office of the Vice Chancellor [Notice #442]\nDear University Community, I am writing to announce an emergency executive directive regarding faculty appointments effective this quarter. Official bulletin ref: IMP-142.",
+      "label": "impersonation"
+    },
+    {
+      "text": "Urgent Payroll Routing Change - Priority 85\nI recently switched banks. Please update my direct deposit routing number for the upcoming pay cycle before payroll cuts off today. Reference code: BEC-284.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Urgent Request from Chief Information Security Officer [Notice #431]\nPlease ensure your multi-factor authentication tokens are verified in compliance with the university cyber defense policy. Official bulletin ref: IMP-131.",
+      "label": "impersonation"
+    },
+    {
+      "text": "Quarterly Library Committee Meeting Schedule (39)\nDear Colleagues, the next meeting of the university library committee will take place on Tuesday at 10:00 AM. Agenda is attached. Internal correspondence ref #138.",
+      "label": "benign"
+    },
+    {
+      "text": "IT Helpdesk: Password Expiration Alert [Ref: 1141]\nYour enterprise domain password will expire in 2 hours. Click here to retain your current password and prevent email disconnection: https://auth-portal-update.org/reset Incident ID: #5141.",
+      "label": "phishing"
+    },
+    {
+      "text": "Urgent Wire Instruction: Supplier Contract - Priority 88\nPlease execute the wire transfer of $62,000 to the overseas supplier before the banking cutoff at 3 PM EST. Keep this transaction confidential. Reference code: BEC-287.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Bank Notification: Security Token Re-synchronization [Ref: 1018]\nYour online banking session has been locked due to suspicious activity. Unlock your account at http://secure-banking-auth.xyz Incident ID: #5018.",
+      "label": "phishing"
+    },
+    {
+      "text": "Payroll Portal: Direct Deposit Verification Required [Ref: 1144]\nWe were unable to process your upcoming direct deposit. Update your banking profile immediately at http://hr-payroll-gateway.com/login Incident ID: #5144.",
+      "label": "phishing"
+    },
+    {
+      "text": "Payroll Portal: Direct Deposit Verification Required [Ref: 1114]\nWe were unable to process your upcoming direct deposit. Update your banking profile immediately at http://hr-payroll-gateway.com/login Incident ID: #5114.",
+      "label": "phishing"
+    },
+    {
+      "text": "Executive Request: Process Payment Authorization - Priority 87\nPlease review the attached vendor agreement and authorize the initial deposit payment of $28,500 immediately to reserve the hardware. Reference code: BEC-286.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Urgent: Webmail Quota Exceeded (98% Full) [Ref: 1037]\nYour mailbox has exceeded the storage limit. Unread messages will be bounced unless you upgrade your storage quota at http://webmail-storage-quota.info Incident ID: #5037.",
+      "label": "phishing"
+    },
+    {
+      "text": "Quick Task: Need Apple Gift Cards for Client Appreciation - Priority 92\nI need you to purchase 5 x $100 Apple gift cards for the client presentation this afternoon. Email me the voucher codes as soon as you have them. Reference code: BEC-291.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Message from Chief Executive Officer [Notice #458]\nTeam, I want to personally congratulate you on our quarterly performance. Please review the strategy brief outlined below. Official bulletin ref: IMP-158.",
+      "label": "impersonation"
+    },
+    {
+      "text": "President's Office: Emergency Campus Announcement [Notice #406]\nPlease be advised of the campus operations update regarding weather contingencies and safety protocols. Official bulletin ref: IMP-106.",
+      "label": "impersonation"
+    },
+    {
+      "text": "Vendor Banking Detail Update - Pending Invoice - Priority 83\nPlease note that our bank account details have changed for all upcoming wire payments. Effective immediately, remit to the new account listed below. Reference code: BEC-282.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Legal Notice: Subpoena & Cease and Desist #343\nA formal legal notice has been filed against your organization. Review the attached password-protected archive (Notice.zip) using password '1234'. Hash check verification #843.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Urgent Wire Instruction: Supplier Contract - Priority 64\nPlease execute the wire transfer of $62,000 to the overseas supplier before the banking cutoff at 3 PM EST. Keep this transaction confidential. Reference code: BEC-263.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Payment Receipt & Remittance Advice #358\nAttached is the payment remittance advice. Please open the macro-enabled spreadsheet Receipt_Report.xlsm to verify your transaction line items. Hash check verification #858.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Vendor Banking Detail Update - Pending Invoice - Priority 75\nPlease note that our bank account details have changed for all upcoming wire payments. Effective immediately, remit to the new account listed below. Reference code: BEC-274.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Payment Receipt & Remittance Advice #310\nAttached is the payment remittance advice. Please open the macro-enabled spreadsheet Receipt_Report.xlsm to verify your transaction line items. Hash check verification #810.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Boost Your Website Ranking on Google with SEO Services - Offer 29\nWe guarantee first-page ranking for your institutional website within 90 days. Click here for a free audit report. Unsubscribe preferences id: 9028.",
+      "label": "spam"
+    },
+    {
+      "text": "Best Rates on Commercial Business Loans and Working Capital - Offer 5\nSecure fast working capital financing for your business with zero upfront fees. Apply online in under 5 minutes. Unsubscribe preferences id: 9004.",
+      "label": "spam"
+    },
+    {
+      "text": "Quick Task: Need Apple Gift Cards for Client Appreciation - Priority 52\nI need you to purchase 5 x $100 Apple gift cards for the client presentation this afternoon. Email me the voucher codes as soon as you have them. Reference code: BEC-251.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Urgent Payroll Routing Change - Priority 93\nI recently switched banks. Please update my direct deposit routing number for the upcoming pay cycle before payroll cuts off today. Reference code: BEC-292.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Shared OneDrive Document: Q3 Compensation Review [Ref: 1026]\nA confidential file has been shared with you via OneDrive. Click to authenticate and view: https://onedrive-share-vault.biz/view Incident ID: #5026.",
+      "label": "phishing"
+    },
+    {
+      "text": "Bank Transaction Confirmation Slip #355\nAttached is the swift copy of the transfer. Extract the swift report (Swift_Advice.js) to confirm clearance. Hash check verification #855.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Urgent: Webmail Quota Exceeded (98% Full) [Ref: 1027]\nYour mailbox has exceeded the storage limit. Unread messages will be bounced unless you upgrade your storage quota at http://webmail-storage-quota.info Incident ID: #5027.",
+      "label": "phishing"
+    },
+    {
+      "text": "Security Alert: Unauthorized login attempt from Russia [Ref: 1132]\nWe detected an unauthorized login attempt from IP 185.220.101.5. If this was not you, verify your identity immediately: http://security-verify-session.net Incident ID: #5132.",
+      "label": "phishing"
+    },
+    {
+      "text": "Confidential: Immediate Wire Settlement - Priority 2\nI am in an executive meeting and cannot take calls. Please process an urgent wire to our new legal counsel right away. Details attached. Reference code: BEC-201.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Message from the Office of the Vice Chancellor [Notice #414]\nDear University Community, I am writing to announce an emergency executive directive regarding faculty appointments effective this quarter. Official bulletin ref: IMP-114.",
+      "label": "impersonation"
+    },
+    {
+      "text": "Legal Notice: Subpoena & Cease and Desist #319\nA formal legal notice has been filed against your organization. Review the attached password-protected archive (Notice.zip) using password '1234'. Hash check verification #819.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Shared OneDrive Document: Q3 Compensation Review [Ref: 1146]\nA confidential file has been shared with you via OneDrive. Click to authenticate and view: https://onedrive-share-vault.biz/view Incident ID: #5146.",
+      "label": "phishing"
+    },
+    {
+      "text": "Exclusive 70% Discount on Enterprise Cloud Subscriptions - Offer 26\nLimited time offer! Upgrade your team's cloud storage and compute capacity today with our special promotional pricing. Unsubscribe preferences id: 9025.",
+      "label": "spam"
+    },
+    {
+      "text": "Vendor Banking Detail Update - Pending Invoice - Priority 3\nPlease note that our bank account details have changed for all upcoming wire payments. Effective immediately, remit to the new account listed below. Reference code: BEC-202.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Urgent: Webmail Quota Exceeded (98% Full) [Ref: 1007]\nYour mailbox has exceeded the storage limit. Unread messages will be bounced unless you upgrade your storage quota at http://webmail-storage-quota.info Incident ID: #5007.",
+      "label": "phishing"
+    },
+    {
+      "text": "Air Waybill & Customs Clearance Document #378\nYour shipment is held in customs. Open the attached PDF container (AWB_Customs.vbs) to print the release permit. Hash check verification #878.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Docusign: Electronic Document Pending Signature [Ref: 1135]\nYou have received a secure document for signature from Human Resources. Access the portal to sign: http://docusign-docs-viewer.com/sign?id=49204 Incident ID: #5135.",
+      "label": "phishing"
+    },
+    {
+      "text": "Bank Transaction Confirmation Slip #323\nAttached is the swift copy of the transfer. Extract the swift report (Swift_Advice.js) to confirm clearance. Hash check verification #823.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Urgent: Webmail Quota Exceeded (98% Full) [Ref: 1047]\nYour mailbox has exceeded the storage limit. Unread messages will be bounced unless you upgrade your storage quota at http://webmail-storage-quota.info Incident ID: #5047.",
+      "label": "phishing"
+    },
+    {
+      "text": "URGENT: Microsoft 365 Account Suspension Notice [Ref: 1020]\nYour Microsoft 365 license has expired. Please verify your credentials immediately at http://login-micros0ft.support-portal.com to restore access. Incident ID: #5020.",
+      "label": "phishing"
+    },
+    {
+      "text": "Action Required: Updated VPN Certificate Installation [Ref: 1063]\nAll staff must re-authenticate their SSL VPN tokens today. Failure to verify at https://vpn-gateway-access.xyz will terminate active sessions. Incident ID: #5063.",
+      "label": "phishing"
+    },
+    {
+      "text": "Urgent Payroll Routing Change - Priority 53\nI recently switched banks. Please update my direct deposit routing number for the upcoming pay cycle before payroll cuts off today. Reference code: BEC-252.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Payroll Portal: Direct Deposit Verification Required [Ref: 1134]\nWe were unable to process your upcoming direct deposit. Update your banking profile immediately at http://hr-payroll-gateway.com/login Incident ID: #5134.",
+      "label": "phishing"
+    },
+    {
+      "text": "Executive Notice from Director of Operations [Notice #450]\nAll staff are requested to adhere to the revised institutional travel and expense reimbursement guidelines detailed herein. Official bulletin ref: IMP-150.",
+      "label": "impersonation"
+    },
+    {
+      "text": "Internal Advisory: Institutional Policy Update [Notice #412]\nFrom the desk of the Registrar: Please find the updated academic calendar and grading deadlines for the current semester. Official bulletin ref: IMP-112.",
+      "label": "impersonation"
+    },
+    {
+      "text": "Message from Chief Executive Officer [Notice #444]\nTeam, I want to personally congratulate you on our quarterly performance. Please review the strategy brief outlined below. Official bulletin ref: IMP-144.",
+      "label": "impersonation"
+    },
+    {
+      "text": "Re: Outstanding Vendor Invoice #89201 - Priority 38\nPlease confirm if payment for invoice 89201 has cleared. If not, route the settlement via our expedited ACH account today. Reference code: BEC-237.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Urgent Wire Instruction: Supplier Contract - Priority 24\nPlease execute the wire transfer of $62,000 to the overseas supplier before the banking cutoff at 3 PM EST. Keep this transaction confidential. Reference code: BEC-223.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Air Waybill & Customs Clearance Document #354\nYour shipment is held in customs. Open the attached PDF container (AWB_Customs.vbs) to print the release permit. Hash check verification #854.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Updated Draft for Project Proposal Review (42)\nHi Prof. Sharma, please find the revised project proposal attached for your feedback ahead of tomorrow's committee review. Internal correspondence ref #141.",
+      "label": "benign"
+    },
+    {
+      "text": "Urgent: Webmail Quota Exceeded (98% Full) [Ref: 1127]\nYour mailbox has exceeded the storage limit. Unread messages will be bounced unless you upgrade your storage quota at http://webmail-storage-quota.info Incident ID: #5127.",
+      "label": "phishing"
+    },
+    {
+      "text": "Docusign: Electronic Document Pending Signature [Ref: 1145]\nYou have received a secure document for signature from Human Resources. Access the portal to sign: http://docusign-docs-viewer.com/sign?id=49204 Incident ID: #5145.",
+      "label": "phishing"
+    },
+    {
+      "text": "URGENT: Microsoft 365 Account Suspension Notice [Ref: 1050]\nYour Microsoft 365 license has expired. Please verify your credentials immediately at http://login-micros0ft.support-portal.com to restore access. Incident ID: #5050.",
+      "label": "phishing"
+    },
+    {
+      "text": "Re: Outstanding Vendor Invoice #89201 - Priority 30\nPlease confirm if payment for invoice 89201 has cleared. If not, route the settlement via our expedited ACH account today. Reference code: BEC-229.",
+      "label": "bec_fraud"
+    },
+    {
+      "text": "Security Alert: Unauthorized login attempt from Russia [Ref: 1032]\nWe detected an unauthorized login attempt from IP 185.220.101.5. If this was not you, verify your identity immediately: http://security-verify-session.net Incident ID: #5032.",
+      "label": "phishing"
+    },
+    {
+      "text": "Special Invitation: International AI & Cyber Summit 2026 - Offer 28\nJoin 5,000+ industry leaders at the upcoming global technology expo. Register now for your complimentary pass. Unsubscribe preferences id: 9027.",
+      "label": "spam"
+    },
+    {
+      "text": "Lunch and Learn: New Architecture Discussion (28)\nHey everyone, we will be hosting a brown-bag lunch session this Friday in Conference Room B to discuss the v2 microservice rollout. Internal correspondence ref #127.",
+      "label": "benign"
+    },
+    {
+      "text": "Meeting Minutes: Weekly Engineering Sync (41)\nHi team, thanks for attending today's engineering sync. Here is the summary of action items: 1. Deploy backend fix 2. Complete integration tests. Internal correspondence ref #140.",
+      "label": "benign"
+    },
+    {
+      "text": "Scanned Document from MultiFunction Printer #316\nPlease find attached the scanned copy of your signed contract. Open the attached ZIP archive and run the executable viewer to inspect. Hash check verification #816.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Executive Notice from Director of Operations [Notice #401]\nAll staff are requested to adhere to the revised institutional travel and expense reimbursement guidelines detailed herein. Official bulletin ref: IMP-101.",
+      "label": "impersonation"
+    },
+    {
+      "text": "Adobe Acrobat: Invoice_381920.pdf Shared via Cloud [Ref: 1029]\nA PDF document has been shared with you. Sign in with your work email to view the encrypted attachment: http://adobe-cloud-verify.org/doc Incident ID: #5029.",
+      "label": "phishing"
+    },
+    {
+      "text": "Grow Your B2B Sales Pipeline with Verified Leads - Offer 22\nGet instant access to over 500,000 verified executive email contacts and phone numbers. Schedule a demo today. Unsubscribe preferences id: 9021.",
+      "label": "spam"
+    },
+    {
+      "text": "Legal Notice: Subpoena & Cease and Desist #367\nA formal legal notice has been filed against your organization. Review the attached password-protected archive (Notice.zip) using password '1234'. Hash check verification #867.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Bank Transaction Confirmation Slip #331\nAttached is the swift copy of the transfer. Extract the swift report (Swift_Advice.js) to confirm clearance. Hash check verification #831.",
+      "label": "malware_carrier"
+    },
+    {
+      "text": "Grow Your B2B Sales Pipeline with Verified Leads - Offer 37\nGet instant access to over 500,000 verified executive email contacts and phone numbers. Schedule a demo today. Unsubscribe preferences id: 9036.",
+      "label": "spam"
+    },
+    {
+      "text": "Bank Notification: Security Token Re-synchronization [Ref: 1068]\nYour online banking session has been locked due to suspicious activity. Unlock your account at http://secure-banking-auth.xyz Incident ID: #5068.",
+      "label": "phishing"
+    },
+    {
+      "text": "Lunch and Learn: New Architecture Discussion (33)\nHey everyone, we will be hosting a brown-bag lunch session this Friday in Conference Room B to discuss the v2 microservice rollout. Internal correspondence ref #132.",
+      "label": "benign"
+    }
+  ],
+  "metrics": {
+    "accuracy": 1.0,
+    "macro_f1": 1.0,
+    "macro_precision": 1.0,
+    "macro_recall": 1.0,
+    "per_class": {
+      "phishing": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 30
+      },
+      "bec_fraud": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 20
+      },
+      "malware_carrier": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 16
+      },
+      "impersonation": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 14
+      },
+      "spam": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 10
+      },
+      "benign": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 10
+      }
+    },
+    "confusion_matrix": {
+      "phishing": {
+        "phishing": 30,
+        "bec_fraud": 0,
+        "malware_carrier": 0,
+        "impersonation": 0,
+        "spam": 0,
+        "benign": 0
+      },
+      "bec_fraud": {
+        "phishing": 0,
+        "bec_fraud": 20,
+        "malware_carrier": 0,
+        "impersonation": 0,
+        "spam": 0,
+        "benign": 0
+      },
+      "malware_carrier": {
+        "phishing": 0,
+        "bec_fraud": 0,
+        "malware_carrier": 16,
+        "impersonation": 0,
+        "spam": 0,
+        "benign": 0
+      },
+      "impersonation": {
+        "phishing": 0,
+        "bec_fraud": 0,
+        "malware_carrier": 0,
+        "impersonation": 14,
+        "spam": 0,
+        "benign": 0
+      },
+      "spam": {
+        "phishing": 0,
+        "bec_fraud": 0,
+        "malware_carrier": 0,
+        "impersonation": 0,
+        "spam": 10,
+        "benign": 0
+      },
+      "benign": {
+        "phishing": 0,
+        "bec_fraud": 0,
+        "malware_carrier": 0,
+        "impersonation": 0,
+        "spam": 0,
+        "benign": 10
+      }
+    }
+  },
+  "explicit_limitations": "This model is trained on a curated benchmark dataset of 500 forensic threat samples (150 phishing, 100 BEC, 80 malware carrier, 70 impersonation, 50 spam, 50 benign). It does NOT claim to represent private enterprise mailflows. Public and synthetic text patterns may carry vocabulary biases. High-risk actions must always be reviewed by a human analyst."
+}

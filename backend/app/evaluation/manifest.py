@@ -1,7 +1,7 @@
 """F2 / M12: Corpus Manifest & Limitations Disclosure.
 
-Defines evaluation datasets and explicitly discloses what public corpora do and do not cover,
-ensuring transparency about era, encoding, and institutional traffic biases.
+Defines evaluation datasets and explicitly discloses sample distribution,
+random split parameters, and synthetic/curated benchmark limitations.
 """
 from dataclasses import dataclass
 from typing import Any
@@ -18,9 +18,13 @@ class CorpusMetadata:
 
 
 DEFAULT_CORPUS_MANIFEST = {
-    "corpus_id": "public_eval_v1",
-    "name": "Held-Out Public Phishing & Benign Validation Corpus",
+    "corpus_id": "curated_eval_500",
+    "name": "Curated 500-Sample Forensic Intent Benchmark",
     "total_samples": 500,
+    "train_samples": 400,
+    "test_samples": 100,
+    "random_seed": 42,
+    "model_type": "TF-IDF (max 2500 n-grams) + Calibrated LinearSVC",
     "class_distribution": {
         "phishing": 150,
         "bec_fraud": 100,
@@ -29,10 +33,11 @@ DEFAULT_CORPUS_MANIFEST = {
         "spam": 50,
         "benign": 50,
     },
-    "languages": ["English", "Hindi (limited)"],
+    "languages": ["English", "Hindi (transliterated keywords)"],
     "explicit_limitations": (
-        "This evaluation set is derived from held-out public phishing collections (Nazario, Enron subset, APWG samples). "
-        "IMPORTANT LIMITATION: It does NOT contain real internal institutional correspondence or proprietary enterprise mailflows. "
-        "Performance on local institutional traffic may vary; public corpora carry historical era and header-encoding biases."
+        "This evaluation set is derived from a curated benchmark dataset of 500 forensic threat samples "
+        "(150 phishing, 100 BEC, 80 malware carrier, 70 impersonation, 50 spam, 50 benign). "
+        "IMPORTANT DISCLOSURE: It does NOT claim to represent private enterprise mailflows or proprietary internal traffic. "
+        "Public and synthetic text patterns may carry vocabulary biases. High-risk actions must always be reviewed by a human analyst."
     ),
 }

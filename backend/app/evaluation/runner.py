@@ -1,60 +1,59 @@
 """F2 / M12: ML Model Validation Runner.
 
-Runs evaluation on held-out test splits in background, computes performance metrics,
-and logs results alongside corpus coverage disclosures to the Model Registry.
+Evaluates the actual trained scikit-learn model artifact against the held-out test partition,
+computes true multi-class metrics (accuracy, macro F1, confusion matrix), and logs the run
+to the PostgreSQL ModelRegistry.
 """
+import json
+import os
 from datetime import datetime, timezone
 from typing import Any
+import joblib
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from .manifest import DEFAULT_CORPUS_MANIFEST
 from .metrics import compute_multiclass_metrics
 from ..models import ModelRegistry
+from ..detection.train_classifier import train_and_save, CLASSES
 
-CLASSES = ["phishing", "bec_fraud", "malware_carrier", "impersonation", "spam", "benign"]
 
+def load_model_and_test_set():
+    """Load trained pipeline and held-out test partition."""
+    detection_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "detection"))
+    model_path = os.path.join(detection_dir, "model.joblib")
+    meta_path = os.path.join(detection_dir, "split_metadata.json")
 
-def generate_evaluation_dataset() -> tuple[list[str], list[str]]:
-    """Generate deterministic validation test split for benchmarking model version."""
-    y_true = []
-    y_pred = []
+    # If model or metadata is missing, train and generate it
+    if not os.path.exists(model_path) or not os.path.exists(meta_path):
+        train_and_save()
 
-    # Phishing (94% recall, 92% precision)
-    y_true.extend(["phishing"] * 150)
-    y_pred.extend(["phishing"] * 141 + ["spam"] * 6 + ["bec_fraud"] * 3)
+    model = joblib.load(model_path)
+    with open(meta_path, "r", encoding="utf-8") as f:
+        metadata = json.load(f)
 
-    # BEC / Fraud (91% recall, 90% precision)
-    y_true.extend(["bec_fraud"] * 100)
-    y_pred.extend(["bec_fraud"] * 91 + ["phishing"] * 7 + ["benign"] * 2)
+    test_set = metadata.get("held_out_test_set", [])
+    X_test = [item["text"] for item in test_set]
+    y_test = [item["label"] for item in test_set]
 
-    # Malware Carrier (96% recall, 95% precision)
-    y_true.extend(["malware_carrier"] * 80)
-    y_pred.extend(["malware_carrier"] * 77 + ["phishing"] * 3)
-
-    # Impersonation (90% recall, 88% precision)
-    y_true.extend(["impersonation"] * 70)
-    y_pred.extend(["impersonation"] * 63 + ["phishing"] * 5 + ["benign"] * 2)
-
-    # Spam (88% recall, 86% precision)
-    y_true.extend(["spam"] * 50)
-    y_pred.extend(["spam"] * 44 + ["phishing"] * 4 + ["benign"] * 2)
-
-    # Benign (96% recall, 94% precision)
-    y_true.extend(["benign"] * 50)
-    y_pred.extend(["benign"] * 48 + ["spam"] * 2)
-
-    return y_true, y_pred
+    return model, X_test, y_test, metadata
 
 
 def run_model_evaluation(
     db: Session,
     model_version: str = "drishtimail-nlp-v2.1",
 ) -> dict[str, Any]:
-    """Execute evaluation and log metrics into ModelRegistry."""
-    y_true, y_pred = generate_evaluation_dataset()
-    metrics = compute_multiclass_metrics(y_true, y_pred, CLASSES)
+    """Execute evaluation against actual held-out test partition and log to ModelRegistry."""
+    model, X_test, y_test, metadata = load_model_and_test_set()
+
+    # Run real model predictions on held-out test samples
+    y_pred = list(model.predict(X_test))
+    metrics = compute_multiclass_metrics(y_test, y_pred, CLASSES)
 
     manifest = dict(DEFAULT_CORPUS_MANIFEST)
+    manifest["test_samples_count"] = len(X_test)
+    manifest["model_type"] = metadata.get("model_type", "TF-IDF + Calibrated LinearSVC")
+    manifest["random_seed"] = metadata.get("random_seed", 42)
+
     now_dt = datetime.now(timezone.utc)
 
     registry_entry = db.scalar(select(ModelRegistry).where(ModelRegistry.version == model_version))

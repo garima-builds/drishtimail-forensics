@@ -42,20 +42,20 @@ export const ModelEvaluationView: React.FC = () => {
   };
 
   const metricsData = selectedModel?.metrics || {
-    accuracy: selectedModel?.accuracy ?? 0.928,
-    macro_f1: selectedModel?.macro_f1 ?? 0.916,
+    accuracy: selectedModel?.accuracy ?? 0,
+    macro_f1: selectedModel?.macro_f1 ?? 0,
     per_class: selectedModel?.per_class_metrics || {},
     confusion_matrix: selectedModel?.confusion_matrix || {},
   };
   const perClass = metricsData.per_class || {};
   const confusionMatrix = metricsData.confusion_matrix || {};
-  const accuracy = Number(metricsData.accuracy ?? 0.928);
-  const macroF1 = Number(metricsData.macro_f1 ?? 0.916);
+  const accuracy = Number(metricsData.accuracy ?? 0);
+  const macroF1 = Number(metricsData.macro_f1 ?? 0);
   const trainedAt = selectedModel?.trained_at || selectedModel?.calibrated_at || new Date().toISOString();
   const manifest = selectedModel?.corpus_manifest || {};
   const limitations = selectedModel?.limitations_disclosure || [
-    manifest.explicit_limitations || 'Derived from held-out public phishing collections (Nazario, Enron subset, APWG samples). Does not contain real internal institutional correspondence.',
-    'Performance on local institutional traffic may vary; public corpora carry historical era and header-encoding biases.',
+    manifest.explicit_limitations || 'Curated benchmark dataset of 500 forensic threat samples (150 phishing, 100 BEC, 80 malware, 70 impersonation, 50 spam, 50 benign). Does not claim to represent private enterprise mailflows.',
+    'Public and synthetic text patterns may carry vocabulary biases. High-risk actions must always be reviewed by a human analyst.',
   ];
 
   return (

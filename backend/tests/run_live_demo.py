@@ -116,7 +116,8 @@ try:
     # 9. ML Evaluation
     print('[9/13] Running ML Model Validation Benchmark...')
     eval_res = post_json(f'{BASE}/evaluation/run', {}, token)
-    print('[OK] ML Validation Macro F1:', eval_res.get('macro_f1'), '| Accuracy:', eval_res.get('accuracy'))
+    metrics_obj = eval_res.get('metrics', {})
+    print('[OK] ML Validation Macro F1:', metrics_obj.get('macro_f1'), '| Accuracy:', metrics_obj.get('accuracy'))
 
     # 10. Ledger Entries
     print('[10/13] Checking Evidence Ledger entries...')

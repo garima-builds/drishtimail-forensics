@@ -65,8 +65,9 @@ def run_detection_pipeline(
     # 6. Thread Hijack Check
     th_findings = detect_thread_hijack(subject=subject, headers=headers)
 
-    # 7. Multi-Class Probability Classification
+    # 7. Multi-Class Probability Classification (Trained ML with Heuristic Fallback)
     classification = classify_message_intent(
+        full_text=full_text,
         social_engineering_findings=se_findings,
         bec_findings=bec_findings,
         impersonation_findings=imp_findings,
@@ -84,6 +85,7 @@ def run_detection_pipeline(
             "probabilities": classification.probabilities,
             "confidence": classification.primary_threat_confidence,
             "top_signals": classification.top_contributing_signals,
+            "engine_type": classification.engine_type,
         },
         "social_engineering": se_findings,
         "bec_patterns": bec_findings,
