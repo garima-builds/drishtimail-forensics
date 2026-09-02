@@ -210,6 +210,8 @@ export interface GraphEdgeItem {
   id?: string;
   from_node?: string;
   to_node?: string;
+  source?: string;
+  target?: string;
   source_id?: string;
   target_id?: string;
   edge_type?: string;
