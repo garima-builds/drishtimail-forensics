@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Sidebar, ActiveTab } from './components/Sidebar';
 import { Navbar } from './components/Navbar';
 import { IngestModal } from './components/IngestModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { QueueDashboard } from './views/QueueDashboard';
 import { InvestigationView } from './views/InvestigationView';
 import { CampaignGraphView } from './views/CampaignGraphView';
@@ -13,18 +14,62 @@ import { api } from './api';
 import { Message, DashboardSummary } from './types';
 import './styles.css';
 
-const VALID_TABS: ActiveTab[] = ['queue', 'investigate', 'cases', 'campaigns', 'reports', 'evaluation', 'ledger', 'admin'];
+export const parseTabFromHash = (rawHash: string): ActiveTab => {
+  const clean = (rawHash || '')
+    .replace(/^#+/, '')
+    .replace(/^\/+/, '')
+    .replace(/\/+$/, '')
+    .split('?')[0]
+    .split('/')[0]
+    .trim()
+    .toLowerCase();
+
+  switch (clean) {
+    case 'cases':
+    case 'case':
+    case 'dossier':
+    case 'dossiers':
+      return 'cases';
+    case 'campaigns':
+    case 'campaign':
+    case 'graph':
+    case 'correlation':
+      return 'campaigns';
+    case 'reports':
+    case 'report':
+    case 'pdf':
+      return 'reports';
+    case 'investigate':
+    case 'investigation':
+    case 'inspect':
+      return 'investigate';
+    case 'evaluation':
+    case 'eval':
+    case 'model':
+    case 'registry':
+      return 'evaluation';
+    case 'ledger':
+    case 'evidence':
+    case 'merkle':
+      return 'ledger';
+    case 'admin':
+    case 'administration':
+    case 'settings':
+    case 'config':
+      return 'admin';
+    case 'queue':
+    case 'triage':
+    case 'inbox':
+    case '':
+    default:
+      return 'queue';
+  }
+};
 
 export const App: React.FC = () => {
-  const getTabFromHash = (): ActiveTab => {
-    const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
-    if (VALID_TABS.includes(hash as ActiveTab)) {
-      return hash as ActiveTab;
-    }
-    return 'queue';
-  };
-
-  const [activeTab, setActiveTab] = useState<ActiveTab>(getTabFromHash);
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() =>
+    parseTabFromHash(window.location.hash)
+  );
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -34,12 +79,25 @@ export const App: React.FC = () => {
   useEffect(() => {
     bootstrapSession();
 
-    const handleHashChange = () => {
-      const tab = getTabFromHash();
-      setActiveTab(tab);
+    const handleHashSync = () => {
+      const targetTab = parseTabFromHash(window.location.hash);
+      setActiveTab((prev) => (prev !== targetTab ? targetTab : prev));
     };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+
+    window.addEventListener('hashchange', handleHashSync);
+    window.addEventListener('popstate', handleHashSync);
+
+    // Initial check to ensure hash is set if empty
+    if (!window.location.hash) {
+      window.location.hash = '#/queue';
+    } else {
+      handleHashSync();
+    }
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashSync);
+      window.removeEventListener('popstate', handleHashSync);
+    };
   }, []);
 
   const bootstrapSession = async () => {
@@ -73,7 +131,10 @@ export const App: React.FC = () => {
 
   const handleNavigate = (tab: ActiveTab) => {
     setActiveTab(tab);
-    window.location.hash = `#/${tab}`;
+    const targetHash = `#/${tab}`;
+    if (window.location.hash !== targetHash) {
+      window.location.hash = targetHash;
+    }
   };
 
   const handleSelectMessage = (id: string) => {
@@ -117,40 +178,60 @@ export const App: React.FC = () => {
 
         <main className="content-body">
           {activeTab === 'queue' && (
-            <QueueDashboard
-              summary={summary}
-              messages={messages}
-              loading={loading}
-              onSelectMessage={handleSelectMessage}
-              onOpenIngest={() => setIngestModalOpen(true)}
-              onRefresh={refreshData}
-            />
+            <ErrorBoundary fallbackTitle="Investigation Queue Error" onReset={refreshData}>
+              <QueueDashboard
+                summary={summary}
+                messages={messages}
+                loading={loading}
+                onSelectMessage={handleSelectMessage}
+                onOpenIngest={() => setIngestModalOpen(true)}
+                onRefresh={refreshData}
+              />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'investigate' && (
-            <InvestigationView
-              messageId={selectedMessageId}
-              onBackToQueue={() => handleNavigate('queue')}
-              onSelectMessage={handleSelectMessage}
-            />
+            <ErrorBoundary fallbackTitle="Investigation Deep Dive Error">
+              <InvestigationView
+                messageId={selectedMessageId}
+                onBackToQueue={() => handleNavigate('queue')}
+                onSelectMessage={handleSelectMessage}
+              />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'cases' && (
-            <CaseManagementView onSelectMessage={handleSelectMessage} />
+            <ErrorBoundary fallbackTitle="Cases View Error">
+              <CaseManagementView onSelectMessage={handleSelectMessage} />
+            </ErrorBoundary>
           )}
 
-          {activeTab === 'campaigns' && <CampaignGraphView />}
+          {activeTab === 'campaigns' && (
+            <ErrorBoundary fallbackTitle="Campaign Graph Error">
+              <CampaignGraphView />
+            </ErrorBoundary>
+          )}
 
           {activeTab === 'reports' && (
-            <ReportsView
-              messages={messages}
-              onSelectMessage={handleSelectMessage}
-            />
+            <ErrorBoundary fallbackTitle="Reports View Error">
+              <ReportsView
+                messages={messages}
+                onSelectMessage={handleSelectMessage}
+              />
+            </ErrorBoundary>
           )}
 
-          {activeTab === 'evaluation' && <ModelEvaluationView />}
+          {activeTab === 'evaluation' && (
+            <ErrorBoundary fallbackTitle="ML Model Validation Error">
+              <ModelEvaluationView />
+            </ErrorBoundary>
+          )}
 
-          {(activeTab === 'ledger' || activeTab === 'admin') && <AdminLedgerView />}
+          {(activeTab === 'ledger' || activeTab === 'admin') && (
+            <ErrorBoundary fallbackTitle="Admin & Ledger Error">
+              <AdminLedgerView initialTab={activeTab === 'admin' ? 'config' : 'ledger'} />
+            </ErrorBoundary>
+          )}
         </main>
       </div>
 

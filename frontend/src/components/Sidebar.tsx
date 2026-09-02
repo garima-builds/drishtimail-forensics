@@ -9,6 +9,11 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, selectedMessageId }) => {
+  const handleClick = (e: React.MouseEvent, tab: ActiveTab) => {
+    e.preventDefault();
+    onSelectTab(tab);
+  };
+
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -23,76 +28,92 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
 
       <div className="sidebar-section-title">CORE INVESTIGATION</div>
       <nav className="sidebar-nav">
-        <button
+        <a
+          href="#/queue"
+          data-tab="queue"
           className={`nav-btn ${activeTab === 'queue' ? 'active' : ''}`}
-          onClick={() => onSelectTab('queue')}
+          onClick={(e) => handleClick(e, 'queue')}
         >
           <span className="nav-icon">📥</span>
           <span>Investigation Queue</span>
-        </button>
+        </a>
 
-        <button
+        <a
+          href="#/investigate"
+          data-tab="investigate"
           className={`nav-btn ${activeTab === 'investigate' ? 'active' : ''}`}
-          onClick={() => onSelectTab('investigate')}
+          onClick={(e) => handleClick(e, 'investigate')}
         >
           <span className="nav-icon">🔬</span>
           <span>Investigation Deep Dive</span>
           {selectedMessageId && <span className="nav-badge">Active</span>}
-        </button>
+        </a>
 
-        <button
+        <a
+          href="#/cases"
+          data-tab="cases"
           className={`nav-btn ${activeTab === 'cases' ? 'active' : ''}`}
-          onClick={() => onSelectTab('cases')}
+          onClick={(e) => handleClick(e, 'cases')}
         >
           <span className="nav-icon">📁</span>
           <span>Cases</span>
-        </button>
+        </a>
       </nav>
 
       <div className="sidebar-section-title">INTELLIGENCE & REPORTING</div>
       <nav className="sidebar-nav">
-        <button
+        <a
+          href="#/campaigns"
+          data-tab="campaigns"
           className={`nav-btn ${activeTab === 'campaigns' ? 'active' : ''}`}
-          onClick={() => onSelectTab('campaigns')}
+          onClick={(e) => handleClick(e, 'campaigns')}
         >
           <span className="nav-icon">🕸️</span>
           <span>Campaign Graph</span>
-        </button>
+        </a>
 
-        <button
+        <a
+          href="#/reports"
+          data-tab="reports"
           className={`nav-btn ${activeTab === 'reports' ? 'active' : ''}`}
-          onClick={() => onSelectTab('reports')}
+          onClick={(e) => handleClick(e, 'reports')}
         >
           <span className="nav-icon">📄</span>
           <span>Reports & BSA §63</span>
-        </button>
+        </a>
       </nav>
 
       <div className="sidebar-section-title">ASSURANCE & CONFIG</div>
       <nav className="sidebar-nav">
-        <button
+        <a
+          href="#/evaluation"
+          data-tab="evaluation"
           className={`nav-btn ${activeTab === 'evaluation' ? 'active' : ''}`}
-          onClick={() => onSelectTab('evaluation')}
+          onClick={(e) => handleClick(e, 'evaluation')}
         >
           <span className="nav-icon">📊</span>
           <span>ML Evaluation (F2)</span>
-        </button>
+        </a>
 
-        <button
+        <a
+          href="#/ledger"
+          data-tab="ledger"
           className={`nav-btn ${activeTab === 'ledger' ? 'active' : ''}`}
-          onClick={() => onSelectTab('ledger')}
+          onClick={(e) => handleClick(e, 'ledger')}
         >
           <span className="nav-icon">⛓️</span>
           <span>Evidence Ledger (F7)</span>
-        </button>
+        </a>
 
-        <button
+        <a
+          href="#/admin"
+          data-tab="admin"
           className={`nav-btn ${activeTab === 'admin' ? 'active' : ''}`}
-          onClick={() => onSelectTab('admin')}
+          onClick={(e) => handleClick(e, 'admin')}
         >
           <span className="nav-icon">⚙️</span>
           <span>Administration</span>
-        </button>
+        </a>
       </nav>
 
       <div className="sidebar-footer">

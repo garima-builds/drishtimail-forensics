@@ -2,12 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { LedgerItem } from '../types';
 import { api } from '../api';
 
-export const AdminLedgerView: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'ledger' | 'config'>('ledger');
+interface AdminLedgerViewProps {
+  initialTab?: 'ledger' | 'config';
+}
+
+export const AdminLedgerView: React.FC<AdminLedgerViewProps> = ({ initialTab = 'ledger' }) => {
+  const [activeSubTab, setActiveSubTab] = useState<'ledger' | 'config'>(initialTab);
   const [entries, setEntries] = useState<LedgerItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [sealing, setSealing] = useState<boolean>(false);
   const [sealResult, setSealResult] = useState<string | null>(null);
+
+  // Sync with initialTab prop if it changes
+  useEffect(() => {
+    if (initialTab) {
+      setActiveSubTab(initialTab);
+    }
+  }, [initialTab]);
 
   // Config States
   const [trustedMtas, setTrustedMtas] = useState<string>('');

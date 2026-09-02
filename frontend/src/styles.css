@@ -112,6 +112,8 @@ body {
   font-weight: 500;
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
+  user-select: none;
   transition: all 0.15s ease;
 }
 
