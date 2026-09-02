@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Sidebar, ActiveTab } from './components/Sidebar';
 import { Navbar } from './components/Navbar';
 import { IngestModal } from './components/IngestModal';
@@ -67,37 +67,43 @@ export const parseTabFromHash = (rawHash: string): ActiveTab => {
 };
 
 export const App: React.FC = () => {
+  // Single source of truth: Hash Route State
   const [activeTab, setActiveTab] = useState<ActiveTab>(() =>
-    parseTabFromHash(window.location.hash)
+    parseTabFromHash(typeof window !== 'undefined' ? window.location.hash : '')
   );
+
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [ingestModalOpen, setIngestModalOpen] = useState<boolean>(false);
 
+  // Hash synchronization listener
   useEffect(() => {
-    bootstrapSession();
-
-    const handleHashSync = () => {
-      const targetTab = parseTabFromHash(window.location.hash);
-      setActiveTab((prev) => (prev !== targetTab ? targetTab : prev));
+    const handleLocationChange = () => {
+      const currentTab = parseTabFromHash(window.location.hash);
+      setActiveTab(currentTab);
     };
 
-    window.addEventListener('hashchange', handleHashSync);
-    window.addEventListener('popstate', handleHashSync);
+    window.addEventListener('hashchange', handleLocationChange);
+    window.addEventListener('popstate', handleLocationChange);
 
-    // Initial check to ensure hash is set if empty
-    if (!window.location.hash) {
-      window.location.hash = '#/queue';
+    // Initial check: if empty or raw hash, normalize to '#/queue' or current tab
+    if (!window.location.hash || window.location.hash === '#') {
+      window.location.replace('#/queue');
     } else {
-      handleHashSync();
+      handleLocationChange();
     }
 
     return () => {
-      window.removeEventListener('hashchange', handleHashSync);
-      window.removeEventListener('popstate', handleHashSync);
+      window.removeEventListener('hashchange', handleLocationChange);
+      window.removeEventListener('popstate', handleLocationChange);
     };
+  }, []);
+
+  // Bootstrap session
+  useEffect(() => {
+    bootstrapSession();
   }, []);
 
   const bootstrapSession = async () => {
@@ -116,7 +122,7 @@ export const App: React.FC = () => {
     }
   };
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     try {
       const [sum, msgs] = await Promise.all([
         api.getSummary().catch(() => null),
@@ -127,25 +133,22 @@ export const App: React.FC = () => {
     } catch (err) {
       console.error('Refresh error:', err);
     }
-  };
+  }, []);
 
-  const handleNavigate = (tab: ActiveTab) => {
+  const navigateToTab = (tab: ActiveTab) => {
     setActiveTab(tab);
-    const targetHash = `#/${tab}`;
-    if (window.location.hash !== targetHash) {
-      window.location.hash = targetHash;
-    }
+    window.location.hash = `#/${tab}`;
   };
 
   const handleSelectMessage = (id: string) => {
     setSelectedMessageId(id);
-    handleNavigate('investigate');
+    navigateToTab('investigate');
   };
 
   const handleIngestSuccess = async (newMessageId: string) => {
     await refreshData();
     setSelectedMessageId(newMessageId);
-    handleNavigate('investigate');
+    navigateToTab('investigate');
   };
 
   const getTabTitle = () => {
@@ -165,7 +168,7 @@ export const App: React.FC = () => {
     <div className="app-layout">
       <Sidebar
         activeTab={activeTab}
-        onSelectTab={handleNavigate}
+        onSelectTab={navigateToTab}
         selectedMessageId={selectedMessageId}
       />
 
@@ -194,7 +197,7 @@ export const App: React.FC = () => {
             <ErrorBoundary fallbackTitle="Investigation Deep Dive Error">
               <InvestigationView
                 messageId={selectedMessageId}
-                onBackToQueue={() => handleNavigate('queue')}
+                onBackToQueue={() => navigateToTab('queue')}
                 onSelectMessage={handleSelectMessage}
               />
             </ErrorBoundary>
@@ -227,9 +230,15 @@ export const App: React.FC = () => {
             </ErrorBoundary>
           )}
 
-          {(activeTab === 'ledger' || activeTab === 'admin') && (
-            <ErrorBoundary fallbackTitle="Admin & Ledger Error">
-              <AdminLedgerView initialTab={activeTab === 'admin' ? 'config' : 'ledger'} />
+          {activeTab === 'ledger' && (
+            <ErrorBoundary fallbackTitle="Evidence Ledger Error">
+              <AdminLedgerView initialTab="ledger" />
+            </ErrorBoundary>
+          )}
+
+          {activeTab === 'admin' && (
+            <ErrorBoundary fallbackTitle="Administration Error">
+              <AdminLedgerView initialTab="config" />
             </ErrorBoundary>
           )}
         </main>

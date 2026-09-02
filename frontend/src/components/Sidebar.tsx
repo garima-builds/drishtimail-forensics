@@ -9,11 +9,6 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, selectedMessageId }) => {
-  const handleClick = (e: React.MouseEvent, tab: ActiveTab) => {
-    e.preventDefault();
-    onSelectTab(tab);
-  };
-
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -30,9 +25,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
       <nav className="sidebar-nav">
         <a
           href="#/queue"
-          data-tab="queue"
           className={`nav-btn ${activeTab === 'queue' ? 'active' : ''}`}
-          onClick={(e) => handleClick(e, 'queue')}
+          onClick={() => onSelectTab('queue')}
         >
           <span className="nav-icon">📥</span>
           <span>Investigation Queue</span>
@@ -40,9 +34,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
 
         <a
           href="#/investigate"
-          data-tab="investigate"
           className={`nav-btn ${activeTab === 'investigate' ? 'active' : ''}`}
-          onClick={(e) => handleClick(e, 'investigate')}
+          onClick={() => onSelectTab('investigate')}
         >
           <span className="nav-icon">🔬</span>
           <span>Investigation Deep Dive</span>
@@ -51,9 +44,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
 
         <a
           href="#/cases"
-          data-tab="cases"
           className={`nav-btn ${activeTab === 'cases' ? 'active' : ''}`}
-          onClick={(e) => handleClick(e, 'cases')}
+          onClick={() => onSelectTab('cases')}
         >
           <span className="nav-icon">📁</span>
           <span>Cases</span>
@@ -64,9 +56,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
       <nav className="sidebar-nav">
         <a
           href="#/campaigns"
-          data-tab="campaigns"
           className={`nav-btn ${activeTab === 'campaigns' ? 'active' : ''}`}
-          onClick={(e) => handleClick(e, 'campaigns')}
+          onClick={() => onSelectTab('campaigns')}
         >
           <span className="nav-icon">🕸️</span>
           <span>Campaign Graph</span>
@@ -74,9 +65,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
 
         <a
           href="#/reports"
-          data-tab="reports"
           className={`nav-btn ${activeTab === 'reports' ? 'active' : ''}`}
-          onClick={(e) => handleClick(e, 'reports')}
+          onClick={() => onSelectTab('reports')}
         >
           <span className="nav-icon">📄</span>
           <span>Reports & BSA §63</span>
@@ -87,9 +77,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
       <nav className="sidebar-nav">
         <a
           href="#/evaluation"
-          data-tab="evaluation"
           className={`nav-btn ${activeTab === 'evaluation' ? 'active' : ''}`}
-          onClick={(e) => handleClick(e, 'evaluation')}
+          onClick={() => onSelectTab('evaluation')}
         >
           <span className="nav-icon">📊</span>
           <span>ML Evaluation (F2)</span>
@@ -97,9 +86,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
 
         <a
           href="#/ledger"
-          data-tab="ledger"
           className={`nav-btn ${activeTab === 'ledger' ? 'active' : ''}`}
-          onClick={(e) => handleClick(e, 'ledger')}
+          onClick={() => onSelectTab('ledger')}
         >
           <span className="nav-icon">⛓️</span>
           <span>Evidence Ledger (F7)</span>
@@ -107,9 +95,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, select
 
         <a
           href="#/admin"
-          data-tab="admin"
           className={`nav-btn ${activeTab === 'admin' ? 'active' : ''}`}
-          onClick={(e) => handleClick(e, 'admin')}
+          onClick={() => onSelectTab('admin')}
         >
           <span className="nav-icon">⚙️</span>
           <span>Administration</span>
