@@ -3,10 +3,11 @@ import React from 'react';
 interface NavbarProps {
   onOpenIngest: () => void;
   onRefresh: () => void;
+  onLogout?: () => void;
   activeTabTitle: string;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenIngest, onRefresh, activeTabTitle }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenIngest, onRefresh, onLogout, activeTabTitle }) => {
   return (
     <header className="navbar">
       <div className="navbar-left">
@@ -28,6 +29,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenIngest, onRefresh, activeT
             <span className="user-name">Forensic Analyst</span>
             <span className="user-role">Role: Investigator</span>
           </div>
+          {onLogout && (
+            <button
+              className="btn btn-sm btn-secondary ml-2"
+              onClick={onLogout}
+              title="Sign Out Session"
+              style={{ marginLeft: '10px' }}
+            >
+              Sign Out
+            </button>
+          )}
         </div>
       </div>
     </header>

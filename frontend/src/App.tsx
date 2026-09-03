@@ -10,6 +10,7 @@ import { CaseManagementView } from './views/CaseManagementView';
 import { ReportsView } from './views/ReportsView';
 import { ModelEvaluationView } from './views/ModelEvaluationView';
 import { AdminLedgerView } from './views/AdminLedgerView';
+import { LoginView } from './views/LoginView';
 import { api } from './api';
 import { Message, DashboardSummary } from './types';
 import './styles.css';
@@ -67,6 +68,9 @@ export const parseTabFromHash = (rawHash: string): ActiveTab => {
 };
 
 export const App: React.FC = () => {
+  // Authentication Gate State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => api.isAuthenticated());
+
   // Single source of truth: Hash Route State
   const [activeTab, setActiveTab] = useState<ActiveTab>(() =>
     parseTabFromHash(typeof window !== 'undefined' ? window.location.hash : '')
@@ -79,6 +83,18 @@ export const App: React.FC = () => {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [ingestModalOpen, setIngestModalOpen] = useState<boolean>(false);
+
+  // Unauthorized session listener
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setIsAuthenticated(false);
+    };
+
+    window.addEventListener('drishtimail:unauthorized', handleUnauthorized);
+    return () => {
+      window.removeEventListener('drishtimail:unauthorized', handleUnauthorized);
+    };
+  }, []);
 
   // Hash synchronization listener
   useEffect(() => {
@@ -109,12 +125,19 @@ export const App: React.FC = () => {
   }, []);
 
   const bootstrapSession = async () => {
+    if (!api.isAuthenticated()) {
+      setIsAuthenticated(false);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      await api.ensureSession();
+      setIsAuthenticated(true);
       await refreshData();
     } catch (err) {
       console.error('Session bootstrap error:', err);
+      setIsAuthenticated(false);
     } finally {
       setLoading(false);
     }
@@ -172,6 +195,17 @@ export const App: React.FC = () => {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <LoginView
+        onLoginSuccess={async () => {
+          setIsAuthenticated(true);
+          await refreshData();
+        }}
+      />
+    );
+  }
+
   return (
     <div className="app-layout">
       <Sidebar
@@ -185,6 +219,10 @@ export const App: React.FC = () => {
           activeTabTitle={getTabTitle()}
           onOpenIngest={() => setIngestModalOpen(true)}
           onRefresh={refreshData}
+          onLogout={() => {
+            api.logout();
+            setIsAuthenticated(false);
+          }}
         />
 
         <main className="content-body">

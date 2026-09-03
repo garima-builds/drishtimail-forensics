@@ -1640,3 +1640,102 @@ body {
   font-weight: 700;
 }
 
+/* Login Gateway Screen */
+.login-page-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 30%, #151f30 0%, #0b0f19 100%);
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.login-header {
+  text-align: center;
+}
+
+.login-logo {
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.login-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+.btn-block {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  justify-content: center;
+}
+
+.login-presets {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 16px;
+  text-align: center;
+}
+
+.preset-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.preset-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.preset-btn {
+  background-color: var(--bg-inset);
+  border: 1px solid var(--border-color);
+  color: var(--accent-cyan);
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preset-btn:hover {
+  background-color: var(--bg-dark);
+  border-color: var(--accent-cyan);
+  color: #fff;
+}
+
+.login-footnote {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 12px;
+}
+
+.login-footnote code {
+  background-color: var(--bg-inset);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+}
+
+

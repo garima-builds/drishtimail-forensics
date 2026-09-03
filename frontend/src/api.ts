@@ -12,60 +12,35 @@ function isTokenExpired(token: string | null): boolean {
     if (parts.length !== 3) return true;
     const payload = JSON.parse(atob(parts[1]));
     if (!payload.exp) return false;
-    // 30-second margin
+    // 30-second buffer
     return payload.exp * 1000 <= Date.now() + 30000;
   } catch {
     return true;
   }
 }
 
-async function ensureValidToken(): Promise<string | null> {
-  const currentToken = localStorage.getItem('drishtimail_token');
-  if (currentToken && !isTokenExpired(currentToken)) {
-    return currentToken;
-  }
-
-  // Automatic development session recovery
-  try {
-    const res = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'admin@drishtimail.local', password: 'ChangeMe!2026' }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.access_token) {
-        localStorage.setItem('drishtimail_token', data.access_token);
-        return data.access_token;
-      }
-    }
-  } catch (err) {
-    console.warn('Auto-session renewal failed:', err);
-  }
-
-  localStorage.removeItem('drishtimail_token');
-  return null;
-}
-
 async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
-  let headers: Record<string, string> = { ...((options.headers as Record<string, string>) || {}) };
-  
-  if (!headers['Authorization']) {
-    const token = await ensureValidToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+  const token = localStorage.getItem('drishtimail_token');
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem('drishtimail_token');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('drishtimail:unauthorized'));
     }
+    return new Response(JSON.stringify({ detail: 'Authentication required. Please log in.' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
-  let res = await fetch(url, { ...options, headers });
+  let headers: Record<string, string> = { ...((options.headers as Record<string, string>) || {}) };
+  headers['Authorization'] = `Bearer ${token}`;
 
-  // If 401 Unauthorized received, token was rejected by server; re-authenticate and retry once
+  const res = await fetch(url, { ...options, headers });
+
   if (res.status === 401) {
     localStorage.removeItem('drishtimail_token');
-    const freshToken = await ensureValidToken();
-    if (freshToken) {
-      headers['Authorization'] = `Bearer ${freshToken}`;
-      res = await fetch(url, { ...options, headers });
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('drishtimail:unauthorized'));
     }
   }
 
@@ -80,7 +55,10 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) throw new Error('Invalid credentials');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Invalid email or password');
+    }
     const data = await res.json();
     localStorage.setItem('drishtimail_token', data.access_token);
     return data.access_token;
@@ -88,15 +66,22 @@ export const api = {
 
   logout(): void {
     localStorage.removeItem('drishtimail_token');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('drishtimail:unauthorized'));
+    }
   },
 
   getToken(): string | null {
     const token = localStorage.getItem('drishtimail_token');
-    return !isTokenExpired(token) ? token : null;
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem('drishtimail_token');
+      return null;
+    }
+    return token;
   },
 
-  async ensureSession(): Promise<string | null> {
-    return ensureValidToken();
+  isAuthenticated(): boolean {
+    return this.getToken() !== null;
   },
 
   // Dashboard & Messages
