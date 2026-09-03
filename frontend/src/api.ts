@@ -3,7 +3,22 @@ import {
   ModelRegistryItem, LedgerItem, GraphNodeItem, GraphEdgeItem
 } from './types';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+function getApiBaseUrl(): string {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (
+    typeof window !== 'undefined' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1'
+  ) {
+    if (envUrl && !envUrl.includes('localhost') && envUrl.startsWith('http')) {
+      return envUrl;
+    }
+    return 'https://drishtimail-forensics-production.up.railway.app/api/v1';
+  }
+  return envUrl || 'http://localhost:8000/api/v1';
+}
+
+const API_BASE = getApiBaseUrl();
 
 function isTokenExpired(token: string | null): boolean {
   if (!token) return true;

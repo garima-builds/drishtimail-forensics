@@ -119,9 +119,6 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
               Analyst
             </button>
           </div>
-          <p className="login-footnote">
-            Default Prototype Password: <code>ChangeMe!2026</code>
-          </p>
         </div>
       </div>
     </div>
