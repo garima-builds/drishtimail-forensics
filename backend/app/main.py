@@ -422,7 +422,15 @@ def run_pipeline(message_id: str, _: User = Depends(require_roles("admin", "inve
 
 @app.get(f"{settings.api_prefix}/messages/{{message_id}}/analysis")
 def get_analysis_result(message_id: str, _: User = Depends(require_roles("admin", "investigator", "analyst")), db: Session = Depends(get_db)):
-    val_uuid = UUID(message_id)
+    try:
+        val_uuid = UUID(message_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail=f"Invalid message ID: {message_id}")
+    
+    msg = db.get(Message, val_uuid)
+    if not msg:
+        raise HTTPException(status_code=404, detail="Message not found")
+
     run = db.scalar(select(AnalysisRun).where(AnalysisRun.message_id == val_uuid).order_by(AnalysisRun.created_at.desc()).limit(1))
     if not run or not run.result:
         return execute_forensic_pipeline(db, val_uuid)

@@ -54,13 +54,17 @@ def validate_email_authentication(
 
     # SPF Extraction
     spf_match = re.search(r"\bspf=(pass|fail|softfail|neutral|none|temperror|permerror)\b", full_auth_text)
-    if not spf_match and received_spf_lines:
+    if spf_match:
+        spf_result = spf_match.group(1)
+    elif received_spf_lines:
         first_spf = received_spf_lines[0].lower()
+        spf_result = "none"
         for candidate in ("pass", "fail", "softfail", "neutral", "none", "temperror", "permerror"):
             if first_spf.startswith(candidate) or f" {candidate} " in first_spf:
-                spf_match = re.search(rf"\b{candidate}\b", first_spf)
+                spf_result = candidate
                 break
-    spf_result = spf_match.group(1) if spf_match else "none"
+    else:
+        spf_result = "none"
 
     # DKIM Extraction
     dkim_match = re.search(r"\bdkim=(pass|fail|neutral|none|temperror|permerror)\b", full_auth_text)
